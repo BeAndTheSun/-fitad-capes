@@ -1,0 +1,259 @@
+# Wizard
+
+## Overview
+
+The Wizard component provides a flexible and reusable solution for building multi-step forms or views. In addition to handling forms through `WizardFormStep`, the component also supports steps without forms using the `WizardStep` component. This can be used to display static content or custom views without requiring validation or form fields.
+
+## Components
+
+- **Wizard**: The main component that wraps around all steps and handles the overall logic of the wizard.
+- **WizardFormStep**: Used for steps that include forms and validation.
+- **WizardStep**: Used for non-form steps or static views that don't require form logic.
+- **WizardContextProvider**: Provides state management and navigation context for the wizard.
+- **Stepper**: Displays the current progress of the wizard (step indicator).
+
+## Usage
+
+### 1. Wizard Component
+
+This is the top-level component that wraps all the steps and handles the overall wizard logic.
+
+#### Props:
+
+- **onCompleted**: A function that is called when the user completes the wizard.
+- **children**: A collection of `WizardFormStep` components representing each step in the wizard.
+- **renderCompletionComponent** (optional): A React component to display after the wizard is completed.
+- **renderErrorComponent** (optional): A React component to display when the wizard submission returns an error (4XX or 5XX status codes).
+  - For this component to appear, the onCompleted function must catch and return any error thrown inside.
+- **finalButtonLabel** (optional): A string to customize the label for the final button (defaults to "Complete").
+
+#### Example:
+
+```tsx
+import { Wizard } from './Wizard';
+import { z } from 'zod';
+
+const onCompleted = (data: any): WizardCompletionResult<
+    { id: string }, // the type of the API response
+    CustomError // the type of the error returned by this function
+  > => {
+  console.log('Wizard completed with data:', data);
+  try {
+    // call endpoint
+    return {
+      action: WizardCompletionAction.goToSuccess
+      response: { id: '1234' } // this response needs to match the first generic type passed to `WizardCompletionResult`
+    };
+  } catch (err) {
+    return {
+      action: WizardCompletionAction.goToError
+      error: new CustomError('Something failed') // this error needs to match the second generic type passed to `WizardCompletionResult`
+    };
+  }
+};
+
+const MyWizard = () => {
+  return <Wizard onCompleted={onCompleted}>{/* Steps go here */}</Wizard>;
+};
+```
+
+### 2. WizardFormStep Component
+
+Each step in the wizard is represented by the `WizardFormStep` component. This component handles form logic, field rendering, and schema validation.
+
+#### Props:
+
+- **label**: A string to label the step.
+- **schema**: A Zod schema that defines the validation for the form fields in the step.
+- **fields**: An array of form field definitions to render in this step.
+- **defaultValues**: An object that contains the default values for the form fields.
+- **stepKey**: A unique string identifier for the step.
+
+#### Example:
+
+```tsx
+import { WizardFormStep } from './WizardFormStep';
+import { z } from 'zod';
+
+const stepOneSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+});
+
+const fields = [
+  { name: 'firstName', label: 'First Name', type: 'text' },
+  { name: 'lastName', label: 'Last Name', type: 'text' },
+];
+
+const defaultValues = {
+  firstName: '',
+  lastName: '',
+};
+
+const StepOne = () => {
+  return (
+    <WizardFormStep
+      label="Personal Information"
+      schema={stepOneSchema}
+      fields={fields}
+      defaultValues={defaultValues}
+      stepKey="stepOne"
+    />
+  );
+};
+```
+
+### 3. WizardStep Component
+
+The `WizardStep` is a lightweight component that accepts only the `label` and `stepKey` props and can render any content passed as children. This is useful for steps that do not require form submission or validation but are still part of the wizard flow.
+
+#### Props:
+
+- **label**: A string that describes the step (used in the stepper progress indicator).
+- **stepKey**: A unique string identifier for the step.
+- **onNext** (optional): A function to execute when the user clicks the "Next" button.
+- **children**: The content to display for this step (can be any JSX).
+
+#### Example:
+
+```tsx
+import { WizardStep } from './WizardStep';
+
+const WelcomeStep = () => {
+  return (
+    <WizardStep label="Welcome" stepKey="welcomeStep">
+      <h1>Welcome to the Wizard</h1>
+      <p>This is a simple introduction step without any form fields.</p>
+    </WizardStep>
+  );
+};
+```
+
+### Rendering a View-Only Step with WizardStep
+
+You can easily combine `WizardFormStep` and `WizardStep` to create a wizard that includes both form-based and view-only steps.
+
+#### Example:
+
+```tsx
+const MyWizard = () => {
+  return (
+    <Wizard onCompleted={onCompleted}>
+      <WizardStep><WelcomeStep /></WizardStep> {/* Static view-only step */}
+      <WizardFormStep key='StepOne' /> {/* Form-based step */}
+      <WizardFormStep key='StepTwo' /> {/* Form-based step */}
+      <WizardStep><SummaryStep /></WizardStep> {/* Static view-only step */}
+    </Wizard>
+  );
+};
+```
+
+In this example:
+
+- **WelcomeStep** is a view-only step using `WizardStep`.
+- There are two form-based steps using `WizardFormStep` with keys **StepOne** and **StepTwo**.
+- **SummaryStep** is another view-only step, where you might summarize the information before completion.
+
+### 4. Custom Navigation Between Steps
+
+The `WizardFormStep` component allows for custom navigation by using the wizard context to define `onNext` and `onBack` actions. You don't need to manually handle navigation since it is managed by the wizard.
+
+### 5. Handling Form Completion
+
+The `onCompleted` function is called when the user reaches the last step and clicks the "Complete" button. This function will receive all the form data from each step.
+It needs to return some data to specify if the submission was succesful or failed, as shown below.
+#### Example:
+
+```tsx
+const onCompleted = (data: z.infer<typeof wizardSchema>) => {
+  console.log('Final data:', data);
+  // Perform further actions with the form data
+  try {
+    const response = await callApi();
+    // will show `renderCompletionComponent`
+    return { action: WizardCompletionAction.goToSuccess, response }
+  } catch (err) {
+    // will show `renderErrorComponent`
+    return { action: WizardCompletionAction.goToError, error: err }
+  }
+  // if for some reason you just want to stay in the same page, as if the form wasn't submitted, pass this:
+  return { action: WizardCompletionAction.doNothing }
+};
+```
+
+### Typescript Support
+
+#### Define the Validation Schemas
+
+Use Zod to create schemas for each step to enforce validation rules for the data collected during the wizard process.
+
+#### Example:
+
+```tsx
+import { z } from 'zod';
+
+const stepOneSchema = z.object({
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+});
+
+const stepTwoSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(10, 'Phone number is required'),
+});
+
+const wizardSchema = z.object({
+  step1: stepOneSchema,
+  step2: stepTwoSchema,
+});
+```
+
+### Declaring Types in the Wizard
+
+The `Wizard` component can be typed using Zod schemas, allowing for type-safe form handling. Here’s how to declare the types for the wizard:
+
+#### 1. Schema Definition
+
+Define the schemas for each step, as shown above. Use Zod to create validation rules.
+
+#### 2. Use Zod Inference
+
+You can infer types from your Zod schema using `z.infer<typeof schema>`. This allows you to have accurate TypeScript types that correspond to the data structure of your wizard.
+
+#### Example:
+
+```tsx
+const handleCreate = async (
+  data: z.infer<typeof wizardSchema>
+): Promise<boolean> => {
+  const { step2, step3, step4 } = data;
+  // Handle the creation logic using inferred types
+};
+```
+### Typing the Wizard Component
+
+The `Wizard` component has three generic types:
+ - TSchema: specify the inferred type for the data to ensure type safety across all steps.
+ - TResponse: specify the inferred response you are getting from the form submission (the POST endpoint response).
+ - TError (optional): The Error type thrown when the form submission fails.
+
+#### Example:
+
+```tsx
+<Wizard<
+  typeof wizardSchema,
+  ApiResponse,
+  CustomError // optional
+>
+  onCompleted={async (data): Promise<boolean> => {
+    return await handleCreate(data);
+  }}
+  renderCompletionComponent={(data): JSX.Element => finalComponent(data)}
+>
+  {/* Add your steps here */}
+</Wizard>
+```
+
+## Conclusion
+
+The Wizard component allows you to easily create multi-step workflows with a mix of forms and static content. By leveraging Zod for schema validation and TypeScript for type safety, you can create robust and maintainable wizards. Use WizardStep for view-only steps and WizardFormStep for interactive steps to provide a seamless user experience.

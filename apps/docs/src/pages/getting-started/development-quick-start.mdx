@@ -1,0 +1,58 @@
+## Development Quickstart
+
+1. **Clone the repository**
+
+2. **Install the dependencies**
+
+   ```bash
+   yarn install
+   ```
+
+3. **Create the required `.env` files using the `.env.example` of each package as a sample:**
+
+   - [web](./apps/web/.env.example)
+   - [db](./packages/db/.env.example)
+
+4. **Run the database**
+
+   ```bash
+   docker compose up -d
+   ```
+
+   or
+
+   ```bash
+   docker-compose up -d
+   ```
+
+5. **Run the migrations**
+
+   ```bash
+   yarn db:migrate
+   ```
+
+   _Note: This step will fail if you don't create the `.env` file inside the [`@meltstudio/db`](./packages/db/) package_
+
+6. **Fill the database with fixtures**
+
+   ```bash
+   yarn db:fixtures
+   ```
+
+   super admin:
+   ```bash
+   yarn db:super-admin
+   ```
+
+7. **Run the apps**
+
+   ```bash
+   yarn dev
+   ```
+
+   or
+
+   ```bash
+   yarn workspace @meltstudio/web dev
+   ```
+

@@ -1,0 +1,120 @@
+name: Release main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  code-checks:
+    name: Run code checks and quality tools
+    uses: ./.github/workflows/_code_checks.yaml
+    secrets:
+      turbo-team: ${{ secrets.VERCEL_ORG_ID }}
+      turbo-token: ${{ secrets.VERCEL_TOKEN }}
+      db_uri: ${{ secrets.DATABASE_URL }}
+
+  # this section can be uncommented when semantic-release wants to be used, it's
+  # important to also uncomment the "needs" and "if" attributes in the migrate
+  # and deploy-web jobs
+  # release:
+  #   name: Create a new production release
+  #   needs: [code-checks]
+  #   uses: ./.github/workflows/_sem_release.yaml
+  #   permissions:
+  #     contents: write
+  #     issues: write
+  #     pull-requests: write
+  #   secrets:
+  #     semantic_release_token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+
+  # migrate:
+  # name: Run the migrations on the database
+  # uses: ./.github/workflows/_migrate.yaml
+  # with:
+  # environment: Production
+  # secrets:
+  # db_uri: ${{ secrets.DATABASE_URL }}
+
+  # deploy-web:
+  # name: Deploy to vercel
+  # uses: ./.github/workflows/_deploy_vercel.yaml
+  # permissions:
+  # contents: write
+  # issues: write
+  # pull-requests: write
+  # with:
+  # environment: Production
+  # github-comment: false
+  # build-cache-path: apps/web
+  # version: ${{ needs.release.outputs.new_release_version }}
+  # secrets:
+  # vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
+  # vercel-project-id: ${{ secrets.VERCEL_WEB_PROJECT_ID }}
+  # vercel-token: ${{ secrets.VERCEL_TOKEN }}
+  # github-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # deploy-task-runner:
+  # name: Deploy Task Runner
+  # uses: ./.github/workflows/_deploy_task_runner.yaml
+  # permissions:
+  # id-token: write
+  # contents: read
+  # with:
+  # environment: production
+  # audience: sts.amazonaws.com
+  # secrets:
+  # aws-region: ${{ secrets.AWS_REGION }}
+  # role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  # aws-ecr-repo-url: ${{ secrets.AWS_ECR_REPO_URL }}
+  # aws-ecr-image-url: ${{ secrets.AWS_ECR_IMAGE_URL }}
+  # lambda-function-name: ${{ secrets.LAMBDA_FUNCTION_NAME }}
+
+  # Uncomment if you want to deploy over lambda
+
+  # build-push-ecr:
+  # name: Push app to ECR
+  # uses: ./.github/workflows/_build_push_docker.yaml
+  # permissions:
+  # id-token: write
+  # contents: read
+  # with:
+  # dockerfile: ./apps/web/Dockerfile
+  # tags: |
+  # ${{ vars.ECR_REGISTRY }}:latest
+  # ${{ vars.ECR_REGISTRY }}:${{ github.sha }}
+  # ecr-registry: ${{ vars.ECR_REGISTRY }}
+  # ecr-push-role: ${{ vars.ECR_PUSH_ROLE }}
+  # ecr-region: ${{ vars.ECR_REGION }}
+  # secrets:
+  # NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+  # MAILING_USER: ${{ secrets.MAILING_USER }}
+  # NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER: ${{ secrets.NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER }}
+  # ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+  # NEXT_PUBLIC_FILE_STORAGE_PROVIDER: ${{ secrets.NEXT_PUBLIC_FILE_STORAGE_PROVIDER }}
+  # FILE_STORAGE_PROVIDER: ${{ secrets.FILE_STORAGE_PROVIDER }}
+  # NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+  # AWS_REGION: ${{ secrets.AWS_REGION }}
+  # DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  # BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+  # AWS_DYNAMO_DB_TABLE_NAME: ${{ secrets.AWS_DYNAMO_DB_TABLE_NAME }}
+  # MAILING_PASSWORD: ${{ secrets.MAILING_PASSWORD }}
+  # MAILING_DEFAULT_FROM: ${{ secrets.MAILING_DEFAULT_FROM }}
+  # ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+  # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  # NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
+  # ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+  # SENTRY_WEBPACK_PLUGIN: ${{ secrets.SENTRY_WEBPACK_PLUGIN }}
+
+  # update-lambda:
+  # name: Update lambda function
+  # needs: [build-push-ecr]
+  # uses: ./.github/workflows/_update_lambda.yaml
+  # permissions:
+  # id-token: write
+  # contents: read
+  # with:
+  # ecr-registry: ${{ vars.ECR_REGISTRY }}
+  # lambda-update-role: ${{ vars.LAMBDA_UPDATE_ROLE }}
+  # lambda-region: ${{ vars.LAMBDA_REGION }}
+  # lambda-name: ${{ vars.LAMBDA_FUNCTION_NAME }}

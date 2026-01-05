@@ -1,0 +1,42 @@
+name: Build and push docker image
+
+on:
+  workflow_call:
+    inputs:
+      ecr-registry:
+        description: 'AWS ECR Registry URL'
+        required: true
+        type: string
+      lambda-update-role:
+        description: 'AWS IAM role to assume when updating lambda'
+        required: true
+        type: string
+      lambda-region:
+        description: 'AWS region where lambda repository is located'
+        required: true
+        type: string
+      lambda-name:
+        description: 'AWS region where lambda repository is located'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch || github.ref }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.lambda-update-role }}
+          aws-region: ${{ inputs.lambda-region }}
+      - name: Update lambda with the latest version from ecr
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ inputs.lambda-name }} \
+            --image-uri ${{ inputs.ecr-registry }}:latest

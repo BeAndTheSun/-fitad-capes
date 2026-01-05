@@ -1,0 +1,109 @@
+# Feature Flags
+
+This package offers a React-based solution for managing feature flags, enabling dynamic feature control and seamless integration into your application.
+
+## Content
+
+1. [Overview](#overview)
+2. [Enum for Flag IDs](#enum-for-flag-ids)
+3. [Available Components](#available-components)
+   - [FeatureFlagProvider](#featureflagprovider)
+   - [useFeatureFlag](#usefeatureflag)
+   - [withFeatureFlag](#withfeatureflag)
+   - [FeatureFlagWrapper](#featureflagwrapper)
+4. [Usage in the Application](#usage-in-the-application)
+
+## Overview
+
+This package provides a streamlined approach to managing feature flags in a React application. It leverages React's context and provider to control access to feature flags throughout your app. Each feature flag is represented by a schema with the following properties:
+
+- **id**: A unique identifier for the feature flag.
+- **description**: A brief description of the feature flag.
+- **released**: The release status of the feature flag, indicating whether it's active or inactive.
+
+Example:
+
+```ts
+{
+  id: 'EXAMPLE_FEATURE_FLAG',
+  description: "This is the description placeholder",
+  released: false
+}
+```
+
+Feature flag data is stored in the project's database, ensuring that feature flags can be managed and updated dynamically.
+
+## Enum for Flag IDs
+
+To avoid issues with string literals, such as misspellings or errors, an enum is provided for flag IDs. This allows you to access feature flag IDs in a type-safe manner. For example:
+
+```ts
+enum FeatureFlag {
+  EXAMPLE_FEATURE_FLAG = 'EXAMPLE_FEATURE_FLAG',
+  // Add more flags as needed
+}
+```
+
+You can then use the enum when accessing feature flags:
+
+```jsx
+const { released } = useFeatureFlag(FeatureFlag.EXAMPLE_FEATURE_FLAG);
+```
+
+This approach helps prevent common errors associated with string literals and ensures consistency across the application.
+
+## Available Components
+
+### `FeatureFlagProvider`
+
+- **Purpose**: This component provides the feature flag context to your application. Wrap your application or specific parts of it with this provider to make feature flags accessible to child components.
+- **Example**:
+  ```jsx
+  <FeatureFlagProvider>
+    <App />
+  </FeatureFlagProvider>
+  ```
+
+### `useFeatureFlag`
+
+- **Purpose**: This hook accepts the id of a feature flag and returns the flag schema.
+- **Example**:
+  ```jsx
+  const { id, description, released } = useFeatureFlag(
+    FeatureFlag.EXAMPLE_FEATURE_FLAG
+  );
+  ```
+
+### `withFeatureFlag`
+
+- **Purpose**: This HOC takes three parameters: `flag` (the id of the feature flag), `Component` (the component to render if the feature flag is active), and `FallbackComponent` (an optional component to render if the feature flag is inactive).
+- **Example**:
+  ```jsx
+  const MyComponentWithFlag = withFeatureFlag(
+    FeatureFlag.EXAMPLE_FEATURE_FLAG,
+    MyComponent,
+    FallbackComponent
+  );
+  ```
+
+### `FeatureFlagWrapper`
+
+- **Purpose**: This wrapper component renders its child component based on the state of the specified feature flag. It accepts a `flag` prop that specifies the feature flag's id.
+- **Example**:
+  ```jsx
+  <FeatureFlagWrapper flag={FeatureFlag.EXAMPLE_FEATURE_FLAG}>
+    <MyComponent />
+  </FeatureFlagWrapper>
+  ```
+
+## Usage in the Application
+
+To integrate the feature flag package into your application, follow these steps:
+
+1. **Provide the Context**: Wrap the relevant part of your application with the feature flag context provider. This makes the feature flags accessible to all child components within the provider.
+
+2. **Define Feature Flags**: Add the flag IDs to the `FeatureFlag` enum to ensure type safety and avoid string literals.
+
+3. **Access Feature Flags**: Utilize the available UI components to determine the active state of a feature flag.
+
+4. **Control Based on Flag**: Based on the feature flag's state, decide which parts of the app should be rendered or hidden, such as rendering the main component, a fallback component, or nothing.

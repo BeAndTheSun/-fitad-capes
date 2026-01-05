@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "extends": [
+    "@meltstudio/eslint-config/react-ts",
+    "@meltstudio/eslint-config/jest-react-overrides",
+    "plugin:i18next/recommended"
+  ],
+  "rules": {
+    "react/style-prop-object": [
+      "error",
+      {
+        "allow": ["StatusBar"]
+      }
+    ],
+    "i18next/no-literal-string": "off"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "root": true,
+  "extends": [
+    "@meltstudio/eslint-config/node-ts",
+    "@meltstudio/eslint-config/jest-overrides"
+  ],
+  "rules": {
+    // FIXME: enable this
+    "@typescript-eslint/consistent-type-definitions": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": ["packages/*/tsconfig.json", "tsconfig.json"]
+      }
+    }
+  }
+}

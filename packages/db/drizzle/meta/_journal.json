@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1737124696524,
+      "tag": "0000_wild_longshot",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749150061560,
+      "tag": "0001_add-record-id-to-tables-history",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749830808755,
+      "tag": "0002_modify_the_webhooks_table_and_add_webhook_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1751918746953,
+      "tag": "0003_change_the_name_of_platform_to_name_in_the_webhooks",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751919206709,
+      "tag": "0004_add_the_event_types_array_to_the_webhooks_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1751921819470,
+      "tag": "0005_update_createdat_field_to_timestamptz_default_utc",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1753214300406,
+      "tag": "0006_add_the_global_feature_flag_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1758837429033,
+      "tag": "0007_add_model_reports",
+      "breakpoints": true
+    }
+  ]
+}

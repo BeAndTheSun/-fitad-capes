@@ -1,0 +1,7 @@
+20
+
+# This file is used to specify the node version to use in the project.
+# It is used by nvm (Node Version Manager) to switch to the correct
+# version of node when you run:
+# `nvm use`
+# in the project directory or any of its subdirectories

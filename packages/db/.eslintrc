@@ -1,0 +1,48 @@
+{
+  "root": true,
+  "extends": [
+    "@meltstudio/eslint-config/node-ts",
+    "@meltstudio/eslint-config/jest-overrides"
+  ],
+  "overrides": [
+    {
+      "files": ["migrate.ts", "fixtures/*", "sync-algolia/*"],
+      "rules": {
+        "no-console": "off",
+        "import/no-extraneous-dependencies": [
+          "off",
+          {
+            "devDependencies": false
+          }
+        ]
+      }
+    },
+    {
+      "files": ["drizzle.config.ts"],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    }
+  ],
+  "plugins": ["unused-imports"],
+  "rules": {
+    "unused-imports/no-unused-imports": "error",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": ["packages/*/tsconfig.json", "tsconfig.json"]
+      }
+    }
+  }
+}

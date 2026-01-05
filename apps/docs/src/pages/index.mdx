@@ -1,0 +1,280 @@
+# Melt's Template for Turborepo
+
+Welcome to the project! This is a monorepo designed to streamline development and collaboration across multiple applications and shared libraries. It leverages modern tooling like Turborepo, Yarn Workspaces, and TypeScript to ensure scalability and maintainability. This document provides an overview of the project structure to help you navigate and understand its components.
+
+
+This template includes the following things:
+
+## Demo Apps
+
+- [Next.js](./apps/web/)
+- [Expo](./apps/mobile)
+- [Express](./apps/server/)
+
+## Reusable Packages
+
+- [auth](./packages/auth/): Auth utilities using Next-Auth
+- [db](./packages/db/): Database models using Drizzle ORM
+- [api](./packages/api/): Shared API using zodios
+- [ui](./packages/ui): Common UI components
+- [feature-flags](./packages/feature-flags): Feature flags components
+
+## Reusable Configurations
+
+- [jest-config](./configs/jest-config/)
+
+## Internationalization with Yarn
+
+This project utilizes the i18next library for handling translations across all applications.
+
+### Using i18next
+
+To include translations in your components, you can use either the `useTranslation` hook or the `Trans` component. Here’s how to use them:
+
+### Maintaining Translation Files
+
+Before making a commit, it’s important to update the translation files to reflect any changes made. Follow these steps:
+
+1. Run the command to scan for translations:
+   ```bash
+   yarn i18n:scan
+   ```
+   This command will generate English keys in the `translations/es.json` file.
+
+2. Add Spanish translations:
+   Once the keys are generated, developers should provide the corresponding Spanish values in the `translations/es.json` file.
+
+3. Update locale files:
+   After completing the Spanish translations, run the command again:
+   ```bash
+   yarn i18n:scan
+   ```
+   This will update the locale files for the apps with the correct values.
+
+### Additional Notes
+
+- Ensure that all text strings in the application are using `useTranslation` or `Trans` so they can be detected by the translation scanning process.
+- If new text strings are added, remember to repeat the scanning and translation process to keep the files updated.
+
+## Project Structure
+
+### Graphical Representation
+
+Below is a graphical overview of the project structure:
+
+```
+Root
+├── .husky
+├── terraform
+├── configs
+├── scripts
+├── packages
+│   ├── ui
+│   ├── tasks
+│   ├── types
+│   ├── core
+│   ├── logger
+│   ├── server-common
+│   ├── auth
+│   ├── feature-flags
+│   ├── client-common
+│   ├── zod-schemas
+│   ├── common
+│   ├── theme
+│   ├── ai
+│   ├── db
+│   ├── api
+│   ├── algolia-client
+│   ├── mailing
+├── apps
+│   ├── web
+│   ├── server
+│   ├── docs
+│   ├── mobile
+│   ├── task-runner
+├── .github
+├── translations
+├── [root files]
+```
+
+### Root Files
+
+These are important configuration and metadata files located in the root of the project:
+
+- **.releaserc.json**: Configuration for automated release management.
+- **.czrc**: Commitizen configuration for standardized commit messages.
+- **.syncpackrc**: Syncpack configuration to keep package versions consistent.
+- **turbo.json**: Turborepo configuration file.
+- **.prettierignore**: Files and directories ignored by Prettier.
+- **README.md**: Primary documentation for the project.
+- **yarn.lock**: Dependency lock file for Yarn.
+- **.dockerignore**: Files and directories ignored by Docker.
+- **.prettierrc.json**: Prettier configuration file.
+- **.gitignore**: Git ignore file.
+- **package.json**: Node.js project metadata and dependencies.
+- **.gitattributes**: Git attributes file for repository configuration.
+- **docker-compose.yml**: Docker Compose configuration.
+- **.commitlintrc.json**: Commit linting configuration.
+- **.ls-lint.yml**: Linting configuration for file and directory naming.
+- **.nycrc**: Configuration for NYC (code coverage tool).
+- **.lintstagedrc.cjs**: Configuration for lint-staged.
+
+### Root Folders
+
+These folders organize the various aspects of the project:
+
+- **.husky**: Configuration for Git hooks.
+- **terraform**: Infrastructure-as-code for cloud resources.
+- **configs**: Shared configuration files for the project.
+- **scripts**: Automation scripts for development and deployment.
+- **packages**: Shared libraries and modules.
+- **.github**: GitHub-specific configurations like workflows.
+- **apps**: Main applications for the project.
+- **translations**: Localization files for supporting multiple languages.
+
+---
+
+## Apps
+
+The `apps` folder contains the main applications in the project:
+
+- **web**: The main frontend web application.
+- **server**: The backend server application. (If needed to separate from the web app)
+- **docs**: Documentation site for the project.
+- **mobile**: Mobile application (if applicable).
+- **task-runner**: Service for running background tasks. (if applicable)
+
+---
+
+## Packages
+
+The `packages` folder contains shared libraries and utilities:
+
+- **ui**: Shared UI components.
+- **tasks**: Task-related logic.
+- **types**: TypeScript type definitions.
+- **core**: Core utilities and helpers.
+- **logger**: Logging utilities.
+- **server-common**: Common utilities for server applications.
+- **auth**: Authentication module.
+- **feature-flags**: Feature flag management.
+- **client-common**: Shared logic for client applications.
+- **zod-schemas**: Zod schemas for data validation.
+- **common**: Miscellaneous shared utilities.
+- **theme**: Styling and theming utilities.
+- **ai**: AI-related utilities.
+- **db**: Database-related utilities.
+- **api**: API utilities.
+- **algolia-client**: Client for interacting with Algolia.
+- **mailing**: Email-related utilities.
+
+---
+
+## Key Points
+
+- The project follows a monorepo structure managed by **Turborepo**.
+- Shared logic is encapsulated in the `packages` folder for reusability.
+- Applications are modular and located in the `apps` folder.
+- CI/CD and infrastructure configurations are stored in `.github` and `terraform` folders respectively.
+
+---
+
+## FAQ
+
+### How to Create a New Package
+
+To create a new package, follow these steps:
+
+1. **Navigate to the Packages Directory**:
+   ```bash
+   cd packages
+   ```
+
+2. **Create a New Folder** for Your Package:
+   ```bash
+   mkdir my-new-package
+   cd my-new-package
+   ```
+
+3. **Initialize a New Package**:
+   Use the following command to create a `package.json` file:
+   ```bash
+   yarn init -y
+   ```
+
+4. **Add Required Dependencies**:
+   Install any necessary dependencies for your package:
+   ```bash
+   yarn add some-dependency
+   yarn add --dev some-dev-dependency
+   ```
+
+5. **Write Your Code**:
+   Add your source files in a `src` directory and export your functionality via the `index.ts` or `index.js` file.
+
+6. **Set Up Build Scripts**:
+   If needed, configure build scripts in your `package.json`, for example:
+   ```json
+   {
+     "scripts": {
+       "build": "tsc"
+     }
+   }
+   ```
+
+7. **Link the Package**:
+   Use `yarn workspace` to link your package within the monorepo.
+
+8. **Test the Package**:
+   Write tests and verify your package works as expected.
+
+9. **Add Documentation**:
+   Update relevant documentation in the `apps/docs` folder.
+
+### How to Add a New Application
+
+1. **Navigate to the Apps Directory**:
+   ```bash
+   cd apps
+   ```
+
+2. **Create a New Folder** for Your Application:
+   ```bash
+   mkdir my-new-app
+   cd my-new-app
+   ```
+
+3. **Initialize the Application**:
+   Depending on the type of application, use an appropriate template (e.g., Next.js, Express):
+   ```bash
+   npx create-next-app@latest .
+   ```
+
+4. **Update Turborepo Configuration**:
+   Add your new application to the `turbo.json` file to manage build and dev tasks.
+
+5. **Install Dependencies**:
+   Add any dependencies needed for your app:
+   ```bash
+   yarn add some-dependency
+   ```
+
+6. **Link Shared Packages**:
+   Use `yarn workspace` to link any shared packages:
+   ```bash
+   yarn workspace my-new-app add @project/ui
+   ```
+
+7. **Run the Application**:
+   Start the development server:
+   ```bash
+   yarn dev
+   ```
+
+8. **Document the Application**:
+   Update the `apps/docs` folder with relevant documentation for your new application.
+
+---
+
+For more details, refer to the specific documentation for each package and application in the project.
+

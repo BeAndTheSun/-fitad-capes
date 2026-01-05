@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "paths": {
+      "@/db/*": ["../../packages/db/src/*"],
+
+      "@/server": ["src/server"],
+      "@/utils/*": ["src/utils/*"],
+      "@/routes/*": ["src/routes/*"]
+    }
+  },
+  "include": [
+    "src",
+    "tests",
+    "jest.config.ts",
+    "jest.setup.ts",
+    "tsup.config.ts"
+  ]
+}

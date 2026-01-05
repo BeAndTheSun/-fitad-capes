@@ -1,0 +1,88 @@
+# Deployment Configuration Guide
+
+This guide walks you through the necessary steps for configuring the deployment environment and setting up essential services for your project.
+
+## 1. GitHub Secrets Configuration
+
+Ensure that the following secret keys are configured in your GitHub repository settings to enable deployment:
+
+- **VERCEL_WEB_PROJECT_ID**: The Vercel project ID for the web project.
+- **VERCEL_ORG_ID**: The Vercel organization ID.
+- **VERCEL_TOKEN**: The Vercel authentication token.
+
+## 2. Database Setup on Vercel
+
+Create a database in Vercel and ensure the following environment variables are configured on Vercel:
+
+- **DATABASE_URL**: The URL for the database connection.
+
+## 3. Sentry Configuration
+
+For error tracking and performance monitoring, configure the following Sentry environment variables:
+
+- **SENTRY_AUTH_TOKEN**: Your Sentry authentication token.
+- **SENTRY_ORG**: The name of your Sentry organization.
+- **SENTRY_PROJECT**: The name of your Sentry project.
+- **SENTRY_DSN**: The Data Source Name for Sentry.
+- **SENTRY_ENV**: The environment in which the project is running (e.g., `production`, `preview`).
+
+## 4. Mailing Service Configuration
+
+To configure your mailing service, add the following environment variables:
+
+- **MAILING_DEFAULT_FROM**: The default "from" email address for outgoing mail.
+- **MAILING_USER**: The username for mailing service authentication.
+- **MAILING_PASSWORD**: The password for mailing service authentication.
+
+## 5. Authentication Configuration
+
+### Generate Auth Secret
+
+Run the following command to generate the authentication secret:
+
+```bash
+npx auth secret
+```
+
+### Configure the following environment variables:
+
+- **NEXTAUTH_SECRET**: The generated secret for NextAuth.
+
+#### Disable Vercel Authentication
+
+Disable Vercel's built-in authentication to allow the external providers to load.
+
+---
+
+## 6. Two-Factor Authentication Provider Configuration
+
+If you're using two-factor authentication, configure the provider with the following environment variable:
+
+- **NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER**: The two-factor authentication provider (SMS, EMAIL, AUTHENTICATOR).
+
+---
+
+## 7. Storage Provider Configuration
+
+For file storage, configure the storage provider using one of the following options:
+
+### Vercel as Storage Provider
+
+If you're using Vercel for file storage:
+
+1. Set the environment variable:
+
+   - **FILE_STORAGE_PROVIDER**: Set this to `vercel`.
+
+2. **Create a Blob Database**: Create a Blob database in Vercel for storing your files.
+
+### AWS as Storage Provider
+
+If you're using AWS for file storage, set the following environment variables:
+
+- **FILE_STORAGE_PROVIDER**: Set this to `aws`.
+- **AWS_ENDPOINT**: The AWS endpoint URL.
+- **AWS_ACCESS_KEY_ID**: Your AWS access key ID.
+- **AWS_SECRET_ACCESS_KEY**: Your AWS secret access key.
+- **AWS_REGION**: The AWS region where your bucket is located.
+- **BUCKET_NAME**: The name of your AWS S3 bucket.

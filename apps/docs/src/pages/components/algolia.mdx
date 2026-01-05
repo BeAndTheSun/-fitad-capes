@@ -1,0 +1,162 @@
+# Algolia Integration
+
+**Algolia** is a powerful search-as-a-service platform that we utilize to
+implement search, filtering, and sorting functionalities across various parts of
+our application. Before you begin, ensure that your Algolia plan supports the
+features you intend to use, particularly that sorting requires virtual replicas.
+
+## Setup
+
+To set up Algolia, you need to configure the following environment variables in
+your project:
+
+- **`DATABASE_URL`**: Connection string for your database.
+- **`ALGOLIA_ADMIN_API_KEY`**: Admin API key used for object insertion, updates,
+  and deletions on the server side.
+- **`NEXT_PUBLIC_ALGOLIA_APP_ID`**: Application ID for communication with
+  Algolia.
+- **`NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`**: Search key used on the front end.
+
+## Client Instantiation
+
+We have two different clients for interacting with Algolia:
+
+1. **Search Client**: This client is intended for use in the front end of your
+   application. It allows you to perform search queries and retrieve results
+   efficiently without exposing sensitive data.
+
+   ```ts
+   import { AlgoliaClient } from '@meltstudio/algolia-client';
+
+   const searchClient = AlgoliaClient.createAlgoliaClient();
+   ```
+
+2. **Admin Client**: This client is designed for the back end of your
+   application. It provides access to administrative functionalities, such as
+   inserting, updating, and deleting records in your Algolia indices.
+
+   ```ts
+   import { AlgoliaClient } from '@meltstudio/algolia-client';
+
+   const adminClient = AlgoliaClient.createAlgoliaClient();
+   ```
+
+Use the **Search Client** for fetching search results in your UI, while the
+**Admin Client** should be used in server-side code for managing your Algolia
+indices.
+
+## Database Synchronization
+
+To synchronize your database with Algolia, define an `algoliaModel` along with
+`includeRelations` and `notifyRelations` functions. These will help manage the
+model, synchronize data, and define associated filters and sorting.
+
+**Note**: `includeRelations` and `notifyRelations` are optional, but the other
+configurations are required.
+
+### Model Configuration
+
+For each field in your model, you can specify it as a boolean or as an object
+with the following structure:
+
+```ts
+field: {
+  canSort: boolean; // Optional
+  canFilter: boolean; // Optional
+}
+```
+
+### Example of Include Relations
+
+Define the relations that will be included in the object uploaded to Algolia.
+This is an example; you can customize it based on your needs:
+
+```ts
+export const workspaceFeatureFlagsRelation: IncludeRelationDef<
+  typeof featureFlag
+> = {
+  type: 'one',
+  index: AlgoliaIndex.FEATURE_FLAGS,
+  model: algoliaModel({
+    table: featureFlag,
+    pkColumn: featureFlag.id,
+    config: {
+      id: true,
+      flag: true,
+      description: true,
+      released: true,
+      createdAt: true,
+    },
+  }),
+  targetTable: featureFlag,
+  keys: {
+    foreignKey: featureFlag.workspaceId,
+  },
+};
+```
+
+### Example of Notify Relations
+
+Specify the relations that need to be notified when an object is updated but are
+not included in the final object. This is also an example for customization:
+
+```ts
+export const workspaceUserRelation: NotifyRelationDef<typeof users> = {
+  type: 'many',
+  model: user,
+  index: AlgoliaIndex.USERS,
+  targetTable: userWorkspaces,
+  keys: {
+    foreignKey: userWorkspaces.workspaceId,
+    referenceKey: userWorkspaces.userId,
+  },
+};
+```
+
+### Instantiating the Model
+
+To create an object instance, use the `algoliaModel` with the specified
+configuration. The following is an example of how to define a model:
+
+```ts
+export const workspaces = algoliaModel({
+  table: workspace,
+  pkColumn: workspace.id,
+  config: {
+    id: {
+      canFilter: true,
+    },
+    name: true,
+    createdAt: true,
+  },
+  includeRelations: {
+    featureFlags: workspaceFeatureFlagsRelation, // Optional
+  },
+  notifyRelations: {
+    users: workspaceUserRelation, // Optional
+  },
+});
+```
+
+After defining the models, link them to the corresponding database model:
+
+```ts
+import { myModel } from '@/db/algolia/models';
+
+const dbModel = DbModel(this, myModel);
+```
+
+## Synchronization Command
+
+To synchronize your database with Algolia indices, run the following command in
+the root of your repository:
+
+```bash
+yarn algolia:sync
+```
+
+## Automatic Updates
+
+When a model has an associated action, it will automatically update in Algolia
+if the model is properly defined. This ensures that your Algolia indices remain
+in sync with the latest data changes in your application.

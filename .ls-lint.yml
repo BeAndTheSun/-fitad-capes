@@ -1,0 +1,30 @@
+ls:
+  '{apps,configs,packages}/*':
+    .dir: kebab-case
+  '{apps,configs,packages}/*/src':
+    .dir: kebab-case
+    .js: kebab-case
+    .ts: kebab-case
+    .tsx: kebab-case
+    .d.ts: kebab-case
+  # nextjs pages dir
+  apps/*/src/pages:
+    .dir: kebab-case | regex:\[[a-z0-9]+\] | regex:\[\.\.\.[a-z0-9]+\]
+    .js: kebab-case
+    .ts: kebab-case | regex:_app | regex:_document | regex:_error | regex:\[[a-z0-9]+\] | regex:\[\.\.\.[a-z0-9]+\]
+    .d.ts: kebab-case
+  '{apps,configs,packages}/*/tests':
+    .dir: kebab-case | regex:__snapshots__
+    .js: kebab-case
+    .ts: kebab-case
+    .tsx: kebab-case
+    .spec.ts: kebab-case
+    .spec.tsx: kebab-case
+  packages/*/drizzle/migrations:
+    .sql: snake_case
+
+ignore:
+  - .git
+  - node_modules
+  - '{apps,configs,packages}/*/{node_modules,.expo,.turbo,.next,.swc,.react-email,coverage}'
+  - coverage

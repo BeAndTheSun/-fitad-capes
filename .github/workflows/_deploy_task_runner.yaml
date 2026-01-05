@@ -1,0 +1,85 @@
+name: Deploy Task Runner to AWS Lambda
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version number
+        required: false
+        type: string
+        default: 'latest'
+      audience:
+        description: The audience for the AWS request (e.g., sts.amazonaws.com)
+        required: true
+        type: string
+      environment:
+        description: 'The deploy environment'
+        required: true
+        type: string
+    secrets:
+      aws-region:
+        required: true
+        description: AWS region
+      role-to-assume:
+        required: true
+        description: Role to assume
+      aws-ecr-repo-url:
+        required: true
+        description: AWS ECR repository URL
+      aws-ecr-image-url:
+        required: true
+        description: AWS ECR image URL
+      lambda-function-name:
+        required: true
+        description: Lambda function name
+
+env:
+  AWS_REGION: ${{ secrets.aws-region }}
+
+  LAMBDA_FUNCTION_NAME: ${{ secrets.lambda-function-name }}
+  IMAGE_NAME_ECS: ${{ secrets.aws-ecr-image-url }}
+  IMAGE_NAME_VERSION: ${{ secrets.aws-ecr-image-url }}:latest
+  IMAGE_NAME_LATEST: ${{ secrets.aws-ecr-image-url }}:latest
+
+  DOCKERFILE_PATH: apps/task-runner/Dockerfile
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install aws cli
+        uses: unfor19/install-aws-cli-action@v1
+
+      - name: Login to aws
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.aws-region }}
+          role-to-assume: ${{ secrets.role-to-assume }}
+
+      - name: Log in to Amazon ECR
+        run: aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${{ secrets.aws-ecr-repo-url }}
+
+      - name: Build docker image
+        run: |
+          docker build -f $DOCKERFILE_PATH -t $IMAGE_NAME_LATEST .
+
+      - name: Push latest docker image
+        run: docker push $IMAGE_NAME_LATEST
+      - name: Push version docker image
+        if: ${{ inputs.version }} != ''
+        run: |
+          docker tag $IMAGE_NAME_LATEST $IMAGE_NAME_VERSION
+          docker push $IMAGE_NAME_VERSION
+
+      - name: Update Lambda function to use new image
+        run: |
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --image-uri $IMAGE_NAME_ECS:${{ inputs.version }}

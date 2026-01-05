@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "extends": ["@meltstudio/eslint-config/node-ts"],
+  "ignorePatterns": ["dist/", "node_modules/"],
+  "rules": {
+    "func-names": "off",
+    "no-console": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "import/no-default-export": "off",
+    "@typescript-eslint/no-explicit-any": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": ["tsconfig.json"]
+      }
+    }
+  }
+}

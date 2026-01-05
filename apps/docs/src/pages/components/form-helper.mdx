@@ -1,0 +1,328 @@
+# Form Helper Component
+
+## Overview
+
+The Form Helper Component is a powerful and flexible tool for creating forms in
+React applications. It leverages React Hook Form and Zod for form management and
+validation, providing a streamlined way to create complex forms with various
+input types, including nested fields and advanced validation scenarios.
+
+## Key Features
+
+- Easy integration with React Hook Form
+- Built-in support for Zod schema validation, including complex schemas with
+  transformations
+- Multiple input types support (text, password, number, select, checkbox, date,
+  file)
+- Support for nested form fields
+- Responsive layout with customizable field sizes
+- Conditional field validation based on other field values
+
+## Usage
+
+Here's an example that demonstrates many of the component's features:
+
+```tsx
+import { useFormHelper, buildNumberZodSchema } from '@/ui/form-hook-helper';
+import { z } from 'zod';
+
+enum UserRole {
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+}
+
+const customSchema = z
+  .object({
+    name: z.string().min(1),
+    age: buildNumberZodSchema({ isInteger: true, max: 10, min: -10 }),
+    date: z.date(),
+    role: z.nativeEnum(UserRole),
+    // it supports nested fields
+    password: z.object({
+      old: z.string(),
+      new: z.string(),
+    }),
+    paymentMethod: z
+      .array(z.enum(['credit card', 'debit card', 'cash'])),
+    file: z.instanceof(File),
+    socialNetworks: z
+      .array(z.enum(['facebook', 'instagram', 'linkedin', 'youtube'])),
+    friends: z.array(z.object({
+      name: z.string(),
+      age: buildNumberZodSchema({ isInteger: true }),
+    })),
+    specialPermission: z.string().optional(),
+  })
+  .refine((data) => {
+    // Custom validation: Only validate 'specialPermission' if 'role' is 'ADMIN'
+    if (data.role === UserRole.ADMIN && !data.specialPermission) {
+      return false; // 'specialPermission' is required if 'role' is 'ADMIN'
+    }
+    return true;
+  }, {
+    message: "Special Permission is required when the role is 'ADMIN'",
+    path: ['specialPermission'],
+  })
+
+const SettingsPage = () => {
+  const { formComponent, form } = useFormHelper(
+    {
+      schema: customSchema,
+      fields: [
+        { name: 'name', type: 'text', label: 'Name', size: 'half' },
+        { name: 'age', type: 'number', label: 'Age', size: 'half' },
+        { name: 'date', type: 'date', label: 'Date', size: 'half', dateInputProps: {/* Props for DatePicker */} },
+        {
+          name: 'role',
+          type: 'select',
+          label: 'Role',
+          options: [
+            { value: UserRole.ADMIN, label: 'Admin' },
+            { value: UserRole.MEMBER, label: 'Member' },
+          ],
+          size: 'full',
+        },
+        // Conditional field based on 'role'
+        {
+          name: 'specialPermission',
+          type: 'text',
+          label: 'Special Permission',
+          dependsOn: { field: 'role', value: UserRole.ADMIN }, // This field is shown only if 'role' is 'ADMIN'
+          size: 'half',
+        }
+        // nested fields should be specified using dot notation
+        { name: 'password.old', type: 'password', label: 'Old password', size: 'half' },
+        { name: 'password.new', type: 'text', label: 'New password', size: 'half' },
+        {
+          name: 'paymentMethod',
+          type: 'checkbox',
+          label: 'Payment methods',
+          options: [
+            { value: 'credit card', label: 'Credit card' },
+            { value: 'debit card', label: 'Debit card' },
+            { value: 'cash', label: 'Cash' },
+          ],
+          size: 'half',
+        },
+        { name: 'file', type: 'file', label: 'Profile photo', size: 'half' },
+        {
+          name: 'socialNetworks',
+          type: 'multiselect',
+          label: 'Social Networks',
+          options: [
+            { value: 'facebook', label: 'Facebook' },
+            { value: 'instagram', label: 'Instagram' },
+            { value: 'linkedin', label: 'Linkedin' },
+            { value: 'youtube', label: 'Youtube' },
+          ],
+          size: 'half',
+        },
+        {
+          name: 'friends',
+          type: 'array',
+          label: 'List of friends',
+          size: 'full',
+          children: [
+            { name: 'name', type: 'text', label: 'Name', size: 'half' },
+            { name: 'age', type: 'number', label: 'Age', size: 'half' },
+          ]
+        }
+      ],
+      onSubmit: (values) => {
+        console.log(values);
+      },
+    },
+    {
+      defaultValues: {
+        name: '',
+        age: '',
+        date: new Date(),
+        role: UserRole.MEMBER
+        specialPermission: '',
+        password: {
+          old: '',
+        },
+        paymentMethod: []
+        file: undefined,
+        socialNetworks: ['facebook', 'youtube'],
+        friends: [{
+          name: 'John',
+          age: 42,
+        }, {
+          name: 'Peter',
+          age: 24,
+        }]
+      },
+    }
+  );
+
+  return formComponent;
+};
+```
+
+## API Reference
+
+### useFormHelper
+
+The main hook for creating a form.
+
+#### Parameters
+
+- `props: Object`
+  - `schema: z.Schema` - Zod schema for form validation. Any error message
+    passed here will be displayed under the respective field when the validation
+    fails.
+  - `fields: FieldData[]` - Array of field configurations. The fields will be
+    rendered in the same order they appear in this list. [FieldData](#fielddata)
+  - `onSubmit: (values: z.infer<TSchema>) => unknown` - Submit handler function.
+    If your zod schema has transforms, pipes or coercions, the onSubmit will
+    receive the transformed values
+  - `isLoading?: boolean` - If the form is being submitted or some data is being
+    loaded, passing true here will disable the submit button and add a loading
+    spinner
+  - `submitContent?: React.ReactNode` - The content to display in the submit button
+  - `customSubmit?: boolean` - If true, the submit button will be hidden
+  - `error?: { error: string; code?: string | undefined; validationErrors?: | { message: string; fields: string[]; }[] | undefined } | null` - Error messages shown over the submit button
+- `useFormProps: UseFormProps` (optional) - Additional props for
+  react-hook-form's useForm hook. Docs
+  [here](https://react-hook-form.com/docs/useform)
+  - Note: `resolver` property is not accepted as the schema is being passed in
+    the first argument
+
+#### Returns
+
+- `formComponent: React.ReactNode` - The rendered form component. It can be
+  directly inserted in the page, as `<div>{formComponent}</div>` or just
+  `return formComponent`
+- `form: UseFormReturn` - The form object returned by react-hook-form's useForm
+  hook
+
+### FieldData
+
+Configuration object for each form field. It will infer the fields names from
+the Zod schema
+
+- `name: string` - Field name (should match schema key, supports dot notation
+  for nested fields as shown in the [Usage](#usage) example with the
+  `password.old` and `password.new` fields
+- `label: string` - Field label.
+- `type?: FieldDataType` - Input type (default: 'text'). Every supported field
+  type has some expected zod schema, as shown in the
+  [FieldDataType](#fielddatatype) section.
+- `size?: 'half' | 'full'` - Field width as a portion of its container (default:
+  'full'). On mobile screens every field will always be full width
+- `options?: { value: string; label: string }[]` - Options for select, multiselect and
+  checkbox inputs. `label` for the input label and `value` for the value to send
+  in the form
+- `dateInputProps?: DatePickerProps` - Props for date picker component
+- `checkboxMode?: FieldCheckboxMode` - Used for checkbox type fields.
+  - If this value equals "default", it will render the list of `options`, each one with its own label and checkbox
+  - If this value equals "boolean", it will render only one boolean option with the `label` text
+- `children?: FieldData<FieldValues>[]` - Used for list type fields. Pass here a
+  list of `FieldData` objects with the inputs for every item of the list
+- **`dependsOn?:`** - This property allows you to conditionally render a field based on the value of another field in the form.
+  - `field` - The name of the field that determines whether the current field is shown.
+  - `value` - The value of the `field` that triggers the visibility of the current field. If the value of the `field` matches `value`, the field will be rendered.
+  - For example, if you want to show a field only when the `role` field is set to `ADMIN`, you would define it like this:
+    ```tsx
+    dependsOn: { field: 'role', value: UserRole.ADMIN }
+    ```
+  - If the condition is met (e.g., `role` is `ADMIN`), the field will be displayed; otherwise, it will not.
+
+### FieldDataType
+
+Every field type supports a different Zod schema that you need to pass as a
+parameter to the first argument of the `useFormHelper` hook.
+
+Note that the preferred schema can have additional transformations, pipes, error
+messages and validations. So for example, the preferred schema for `text` is
+`z.string()` but you could have
+`z.string().min(8).transform(val => val.toUpperCase()).refine(val => !val.startsWith(''))`.
+Any transformation you add will affect the onSubmit parameter.
+
+Currently supported field types (FieldDataType in `packages/ui/src/form-hook-helper/types.ts`):
+
+- `text`: Will render a default text field.
+  - Preferred zod schema is `z.string()`
+- `password`: Will render a default password field.
+  - Preferred zod schema is `z.string()`
+- `number`: Will render a text field modified to handle numeric values
+  - Preferred zod schema is the one returned by `buildNumberZodSchema`, exported
+    in the zod-builders file (packages/ui/src/form-hook-helper/zod-builders.ts).
+- `date`: Will render a button with a calendar popup to change the date.
+  - Preferred zod schema is `z.date()`
+- `select`: Will render a select dropdown.
+  - Preferred zod schema is a `z.nativeEnum` or `z.enum`. The
+    value of the enum should match the value of the options paramter of
+    the FieldData, so if you pass options like
+    `[ { value: UserRole.ADMIN, label: 'Admin' }, { value: UserRole.MEMBER, label: 'Member' }, ]`,
+    you should pass the schema `z.nativeEnum(UserRole)`
+- `multiselect`: Will render a list of checkboxes.
+  - Preferred zod schema is a `z.array(z.nativeEnum)` or `z.array(z.enum)`. The
+    inner value of the array should match the value of the options paramter of
+    the FieldData, so if you pass options like
+    `[ { value: UserRole.ADMIN, label: 'Admin' }, { value: UserRole.MEMBER, label: 'Member' }, ]`,
+    you should pass the schema `z.array(z.nativeEnum(UserRole))`
+- `checkbox`: Will render a list of checkboxes.
+  - Same preferred zod schema as `multiselect`
+- `file`: Will render a `<FileUpload>` component that receives a single file
+  - Preferred zod schema is `z.instanceof(File)`
+
+### ZodBuilders
+
+The file `zod-builders.ts` defines expected zod schemas for fields types.
+Currently only `number` type has a builder due to its complexity.
+
+#### `buildNumberZodSchema`
+
+Helper function to create Zod schemas for number inputs with additional validation.
+
+##### Parameters
+
+- `props: Object`
+  - `isInteger?: boolean` - Validate for integer values
+  - `min?: number` - Minimum allowed value
+  - `max?: number` - Maximum allowed value
+  - `errorMessages?: Object` - Custom error messages for each one of the
+    validations
+
+## Advanced Features
+
+### Nested Fields
+
+The component supports nested fields using dot notation in the field name. For
+example:
+
+```tsx
+{ name: 'password.old', type: 'password', label: 'Old password', size: 'half' }
+```
+
+### Schema Transformations
+
+The Zod schema can include transformations to modify the form data before
+submission:
+
+```tsx
+z.object({
+  // your base schema fields here
+}).transform((val) => ({
+  ...val,
+  name: val.name.trim(),
+  // etc.
+}));
+```
+
+Your onSubmit function will receive the transformed zod values
+
+### Validation messages
+
+If any validation fails, the component will show the correct error message based
+on your schema definition
+
+## Limitations
+
+- No custom component rendering.
+- No styling provided, you will need to update the inner styles or provide new
+  props to handle styling
+- Submission logic is not covered, the component validates correct typing but
+  you will need to handle API calls

@@ -1,0 +1,1 @@
+ALTER TABLE "tables_history" ADD COLUMN "recordId" uuid;

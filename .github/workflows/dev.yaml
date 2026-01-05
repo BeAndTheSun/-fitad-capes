@@ -1,0 +1,44 @@
+name: Release dev
+
+on:
+  push:
+    branches:
+      - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-checks:
+    name: Run code checks and quality tools
+    uses: ./.github/workflows/_code_checks.yaml
+    secrets:
+      turbo-team: ${{ secrets.VERCEL_ORG_ID }}
+      turbo-token: ${{ secrets.VERCEL_TOKEN }}
+      db_uri: ${{ secrets.DATABASE_URL }}
+
+  # migrate:
+  #   name: Run the migrations on the database
+  #   uses: ./.github/workflows/_migrate.yaml
+  #   with:
+  #     environment: Development
+  #   secrets:
+  #     db_uri: ${{ secrets.DATABASE_URL }}
+
+  deploy-web:
+    name: Deploy to vercel
+    uses: ./.github/workflows/_deploy_vercel.yaml
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    with:
+      environment: Development
+      github-comment: true
+      build-cache-path: apps/web
+    secrets:
+      vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
+      vercel-project-id: ${{ secrets.VERCEL_WEB_PROJECT_ID }}
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}

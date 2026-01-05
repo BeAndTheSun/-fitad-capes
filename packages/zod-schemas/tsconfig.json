@@ -1,0 +1,11 @@
+{
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/zod-schemas/*": ["./src/*"],
+      "@/db/*": ["../db/src/*"]
+    }
+  },
+  "include": ["src", "tests", "jest.config.ts"]
+}

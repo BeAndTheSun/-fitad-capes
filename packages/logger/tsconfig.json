@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "paths": {
+      "@/logger": ["./src"],
+      "@/logger/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "fixtures",
+    "drizzle.config.ts",
+    "migrate.ts",
+    "tests",
+    "jest.config.ts"
+  ]
+}

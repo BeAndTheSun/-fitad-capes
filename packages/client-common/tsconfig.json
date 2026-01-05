@@ -1,0 +1,12 @@
+{
+  "extends": "@meltstudio/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/api/*": ["../api/src/*"],
+      "@/client-common/*": ["./src/*"],
+      "@/db/*": ["../db/src/*"]
+    }
+  },
+  "include": ["src", "tests", "jest.config.ts"]
+}

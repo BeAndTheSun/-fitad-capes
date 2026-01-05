@@ -1,0 +1,41 @@
+name: Run code checks and quality tools
+
+on:
+  workflow_call:
+    secrets:
+      turbo-token:
+        description: 'Vercel token to use for the turborepo cache'
+        required: false
+      turbo-team:
+        description: 'Vercel team to use for the turborepo cache'
+        required: false
+      db_uri:
+        description: 'Database url including the user and password'
+        required: true
+
+env:
+  TURBO_TOKEN: ${{ secrets.turbo-token }}
+  TURBO_TEAM: ${{ secrets.turbo-team }}
+
+jobs:
+  code-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Setup node with cache'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Run ls-lint
+        run: yarn ls-lint
+      - name: Check syncpack
+        run: yarn syncpack list-mismatches
+      - name: Run checks
+        run: yarn ci:checks
+      - name: Check DB migrations
+        run: yarn db:check
+        env:
+          DATABASE_URL: ${{ secrets.db_uri }}

@@ -1,0 +1,36 @@
+# Adding tests to a new package
+
+When a new package is created, it is important to add tests to ensure its quality.
+
+## Setup jest
+
+1. Add a jest.config.ts file. Currently there are 3 configuration templates in the configs/jest-config folder: one for pure typescript packages (`jest-node.ts`), one for React packages (`jest-react.ts`) and one for Next.js packages (`jest-nextjs.ts`).
+2. Add the needed dev dependencies to package.json.
+  - For pure typescript projects, you need:
+    - "@meltstudio/jest-config": "*"
+    - "@types/jest": "^29.5.12"
+    - "ts-jest": "^29.2.4"
+  - For react projects, you need:
+    - "@meltstudio/jest-config": "*"
+    - "@testing-library/dom": "^10.4.0"
+    - "@testing-library/jest-dom": "^6.5.0"
+    - "@testing-library/react": "^16.0.1"
+    - "@testing-library/user-event": "^14.5.2"
+    - "@types/jest": "^29.5.12"
+    - "jest": "^29.7.0"
+    - "ts-jest": "^29.2.4"
+  - For next projects it's the same as react, but also include:
+    - "jest-environment-jsdom": "^29.7.0",
+
+3. Add the two following scripts to package.json:
+  - `"test": "jest --verbose"`
+  - `"test:coverage": "cross-env COLLECT_COVERAGE=true jest --verbose --runInBand"`
+    - `COLLECT_COVERAGE` variable ensures coverage reports are generated
+    - `--runInBand` is required to ensure jest only runs 1 task at the same time. This is important as turbo will take care of all parallelization. If `--runInBand` is removed, both Turbo and Jest will try to spawn parallel processes, resulting in a degraded performance (locally, over 12 minutes without --runInBand vs around 30 seconds with --runInBand)
+4. Create a `tests/dummy.spec.ts` file, and add a dummy file like the following one:
+```typescript
+it('dummy test, delete after adding real tests', () => {
+  expect(2 + 2).toBe(4);
+});
+```
+  - Having a dummy test is important as Jest won't generate reports if there isn't at least one test

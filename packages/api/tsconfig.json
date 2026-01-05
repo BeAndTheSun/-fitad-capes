@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/db/*": ["../../packages/db/src/*"],
+      "@/api/*": ["./src/*"],
+      "@/mailing/*": ["../../packages/mailing/src/*"],
+      "@/types/*": ["../../packages/types/src/*"],
+      "@/auth/*": ["../../packages/auth/src/*"],
+      "@/logger/*": ["../../packages/logger/src/*"],
+      "@/common/*": ["../../packages/common/src/*"],
+      "@/zod-schemas/*": ["../../packages/zod-schemas/src/*"]
+    }
+  },
+  "include": ["src", "def.ts", "tests", "jest.config.ts"]
+}

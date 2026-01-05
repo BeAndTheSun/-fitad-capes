@@ -1,0 +1,31 @@
+# Coverage Report
+
+As every package has their own coverage report, to create a global coverage report we need the following workspace-level dependencies:
+  - "istanbul-merge": "^2.0.0",
+  - "nyc": "^17.1.0",
+
+`istanbul-merge` will allow us to merge the individual coverage reports into a json file.
+
+`nyc` will generate a new HTML report from the json file and verify the coverage thresholds are met.
+
+## Generating a new report
+
+To generate a workspace-level report, just execute `yarn test:coverage`. Make sure the command reports all tests passed, as sometimes it may still generate a report when some tests have failed
+
+## Modifying minimum coverage thresholds
+
+Thresholds are specified in the .nycrc file. Example:
+```json
+{
+  "lines": 0,
+  "statements": 10,
+  "functions": 0,
+  "branches": 0,
+  "check-coverage": true
+}
+```
+As the project evolves, it is recommended to increase the `statements` property.
+
+## Recommendations
+
+`yarn test:coverage`, can be a more demanding command than `yarn test` depending on your setup. It has been added to the husky pre-commit hook, but if it slows too much the pre-commit, consider replacing `yarn test:coverage` for `yarn test` in the `.husky\pre-commit` file, and just leaving the coverage tests for the CI workflow.

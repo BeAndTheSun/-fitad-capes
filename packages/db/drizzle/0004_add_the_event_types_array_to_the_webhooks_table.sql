@@ -1,0 +1,1 @@
+ALTER TABLE "webhooks" ADD COLUMN "eventTypes" text[] DEFAULT ARRAY[]::text[] NOT NULL;

@@ -1,0 +1,147 @@
+# Configuring Models
+
+Follow the steps below to configure models in the project:
+
+## 1. Create the Schema
+
+In the `packages/db/schema` directory, create the schema file for the model. Example: `users.ts`
+
+```ts
+// Declare drizzle enum
+export const roleEnum = pgEnum('role', enumToPgEnum(UserRoleEnum));
+
+export const users = pgTable('users', {
+  ...baseFields,
+  email: varchar('email', { length: 256 }).unique().notNull(),
+  name: varchar('name', { length: 256 }).notNull(),
+  active: boolean('active').notNull(),
+  password: varchar('password', { length: 256 }).notNull(),
+  is2faEnabled: boolean('is_2fa_enabled').notNull().default(false),
+  secret2fa: varchar('secret_2fa', { length: 256 }),
+  role: roleEnum('role').notNull().default(UserRoleEnum.MEMBER),
+  profileImage: text('profileImage'),
+});
+
+// Types
+export type DbUserWithPassword = typeof users.$inferSelect;
+export type DbUserWithPasswordExtended = InferResultType<
+  'users',
+  {
+    featureFlags: true;
+    workspaces: { with: { workspace: true } };
+  }
+>;
+export type DbUser = Omit<DbUserWithPassword, 'password' | 'secret2fa'>;
+export type DbUserExtended = Omit<
+  DbUserWithPasswordExtended,
+  'password' | 'secret2fa'
+>;
+export type DbNewUser = typeof users.$inferInsert;
+export type DbUserSorting = TableSorting<DbUser>;
+```
+
+## 2. Create the Relations
+
+In the `packages/db/schema/relations.ts` file, create the relations for the model. Example:
+
+```typescript
+export const usersRelations = relations(users, ({ many, one }) => ({
+  passwordRecoveryTokens: many(passwordRecoveryTokens),
+  featureFlags: many(userFeatureFlags),
+  workspaces: many(userWorkspaces),
+  inviteToken: one(memberInvitations, {
+    fields: [users.id],
+    references: [memberInvitations.userId],
+  }),
+}));
+```
+
+## 3. Update `DbModelMap`
+
+Add the model to the `DbModelMap` in `packages/db/models/db.ts`. For example:
+
+```typescript
+export type DbModelMap = {
+  users: DbUserModel;
+  // Add other models here
+};
+```
+
+## 4. Create the Model Class
+
+In `packages/db/models`, create a file for the model. Example: `users.ts`.
+
+```typescript
+type DbUserWhere = { name?: string; };
+
+export class DbUserModel extends DbModel<typeof usersTable, DbUserWhere> {
+  protected get dbTable(): typeof usersTable {
+    return usersTable;
+  }
+
+  protected get adminFieldChoiceName(): string {
+    return 'name';
+  }
+
+  protected get modelName(): DbModelKeys {
+    return 'users';
+  }
+
+  protected get manyRelationsMap(): Map<string, ManyRelations> {
+    this.registerManyRelations('workspace', 'userWorkspaces', {
+      mainKey: 'userId',
+      relatedKey: 'workspaceId',
+      relatedField: 'workspaces',
+    });
+    return this.dynamicManyRelationsMap;
+  }
+
+  protected override filterQuery<Query extends PgSelect>(
+    query: Query,
+    where: DbUserWhere
+  ): Query {
+    let filtered = query;
+    if (where.name != null) {
+      filtered = filtered.where(eq(this.dbTable.name, where.name));
+    }
+    return filtered;
+  }
+}
+```
+
+## Model Class Details
+
+- **dbTable**: The schema created earlier.
+- **adminFieldChoiceName**: The name of the field used to identify records in the admin.
+- **modelName**: The model’s name.
+- **manyRelationsMap**: Add all relations for the model.
+- **filterQuery**: Add fields to filter records in the table.
+
+
+## 5. Create Zod Schemas
+
+In `packages/zod-schemas`, create files for the Zod schemas. Example:
+
+```typescript
+export const {
+  insert: insertUserSchema,
+  select: selectUserSchemaWithPassword,
+  sorting: sortingUserSchema,
+} = createSchemasForTable(dbSchemas.users, {
+  insert: {
+    id: (s) => s.id.uuid(),
+    email: (s) => s.email.email(),
+  },
+  select: {
+    id: (s) => s.id.uuid(),
+    email: (s) => s.email.email(),
+    secret2fa: (s) => s.secret2fa.nullish(),
+    profileImage: (s) => s.profileImage.nullable(),
+  },
+});
+```
+
+## Zod Schema Definitions
+
+- **insert**: Define rules for inserting data (e.g., email format).
+- **select**: Specify rules for selecting data (e.g., nullable fields).

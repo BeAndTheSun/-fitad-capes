@@ -1,0 +1,72 @@
+name: Deploy to vercel
+
+on:
+  workflow_call:
+    secrets:
+      vercel-team-id:
+        description: 'Vercel team id'
+        required: true
+      vercel-project-id:
+        description: 'Vercel project id'
+        required: true
+      vercel-token:
+        description: 'Vercel token to authenticate'
+        required: true
+      github-token:
+        description: 'GitHub token used to create the pull request comment'
+        required: false
+    inputs:
+      environment:
+        description: 'The deploy environment'
+        required: true
+        type: string
+      github-comment:
+        description: 'Create comment on the pull request or commit with the deployment information'
+        required: false
+        type: boolean
+      build-cache-path:
+        description: 'Path to use for the build cache'
+        required: true
+        type: string
+      version:
+        description: Version to publish
+        required: false
+        type: string
+
+env:
+  TURBO_TOKEN: ${{ secrets.vercel-token }}
+  TURBO_TEAM: ${{ secrets.vercel-team-id }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: 'Setup node with cache'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - name: Setup Nextjs cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/${{ inputs.build-cache-path }}/.next/cache
+          key: nextjs-cache-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('**/yarn.lock') }}-
+      # this is a workaround since we're not commiting the version change
+      - name: Replace version in package.json
+        if: ${{ inputs.version }}
+        run: |
+          jq '.version="${{ inputs.version }}"' package.json > package.json.tmp
+          mv package.json.tmp package.json
+      - name: Deploy to Vercel
+        uses: MeltStudio/melt-action-vercel@v2
+        with:
+          vercel-team-id: ${{ secrets.vercel-team-id }}
+          vercel-project-id: ${{ secrets.vercel-project-id }}
+          vercel-token: ${{ secrets.vercel-token }}
+          vercel-is-production: ${{ inputs.environment == 'Production' }}
+          github-comment: ${{ inputs.github-comment }}
+          github-token: ${{ secrets.github-token }}

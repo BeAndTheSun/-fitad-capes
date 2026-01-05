@@ -1,0 +1,44 @@
+# Webhooks
+
+## Overview
+
+The webhook system allows external applications to receive automatic notifications and relevant data when specific events occur in our application
+
+## Components
+
+- **webhooksRouter**: This is the main API endpoint responsible for receiving webhook requests. It routes the requests based on the event and handles the logging and response logic.
+
+- **handleWebhookEvent**: This function manages the logic for sending the webhook. It receives the event and the payload, verifies the event, and sends the relevant data to the configured target URL. It also logs the response in the database.
+
+- **WebhookEventType**: An enum that defines the types of events that can be handled. Currently, it includes ZAPIER_EVENT, but it can easily be expanded to include more events in the future.
+
+- **webhookService**: A class that contains the static sendWebhook method, which is responsible for sending the webhook to the specified URL and handling the response.
+
+## How to Use It if You Want to Add a New Webhook
+
+- **1. Define the Event**: To add a new event to the webhook system, you first need to define a new event type in the WebhookEventType enum.
+
+Example:
+
+```ts
+enum WebhookEventType {
+  ZAPIER_EVENT = 'ZAPIER_EVENT',
+  NEW_EVENT_TYPE = 'NEW_EVENT_TYPE', // Add a new event here
+}
+```
+
+- **2. Handle the Event**: Next, you should add the logic to handle the new event in the handleWebhookEvent function. This involves defining how the payload will be sent and how the response will be logged.
+
+Example:
+
+```ts
+switch (event as WebhookEventType) {
+  case WebhookEventType.NEW_EVENT_TYPE: // Your new event
+    targetUrl = 'Target URL for the new event'; // You can obtain this URL from client configuration
+    break;
+}
+```
+
+## Conclusion
+
+When adding a new webhook, developers should define the new event type, implement the corresponding logic to handle the event, and update the configurations in the database. This design ensures that the process of implementing new webhooks is efficient and scalable throughout the application.

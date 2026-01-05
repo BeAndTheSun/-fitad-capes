@@ -1,0 +1,161 @@
+name: Build and push docker image
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: 'Dockerfile to use'
+        required: true
+        type: string
+      tags:
+        description: 'Image tags'
+        required: true
+        type: string
+      ecr-registry:
+        description: 'AWS ECR Registry URL'
+        required: true
+        type: string
+      ecr-push-role:
+        description: 'AWS IAM role to assume when pushing to ECR'
+        required: true
+        type: string
+      ecr-region:
+        description: 'AWS region where ECR repository is located'
+        required: true
+        type: string
+      build-args:
+        description: Build args
+        required: false
+        type: string
+    secrets:
+      NEXTAUTH_SECRET:
+        description: 'NEXTAUTH_SECRET env var'
+        required: true
+      MAILING_USER:
+        description: 'MAILING_USER env var'
+        required: true
+      NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER:
+        description: 'NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER env var'
+        required: true
+      ENCRYPTION_KEY:
+        description: 'ENCRYPTION_KEY env var'
+        required: true
+      NEXT_PUBLIC_FILE_STORAGE_PROVIDER:
+        description: 'NEXT_PUBLIC_FILE_STORAGE_PROVIDER env var'
+        required: true
+      FILE_STORAGE_PROVIDER:
+        description: 'FILE_STORAGE_PROVIDER env var'
+        required: true
+      NEXT_PUBLIC_ALGOLIA_APP_ID:
+        description: 'NEXT_PUBLIC_ALGOLIA_APP_ID env var'
+        required: true
+      AWS_REGION:
+        description: 'AWS_REGION env var'
+        required: true
+      DATABASE_URL:
+        description: 'DATABASE_URL env var'
+        required: true
+      BUCKET_NAME:
+        description: 'BUCKET_NAME env var'
+        required: true
+      AWS_DYNAMO_DB_TABLE_NAME:
+        description: 'AWS_DYNAMO_DB_TABLE_NAME env var'
+        required: true
+      MAILING_PASSWORD:
+        description: 'MAILING_PASSWORD env var'
+        required: true
+      MAILING_DEFAULT_FROM:
+        description: 'MAILING_DEFAULT_FROM env var'
+        required: true
+      ALGOLIA_APP_ID:
+        description: 'ALGOLIA_APP_ID env var'
+        required: true
+      OPENAI_API_KEY:
+        description: 'OPENAI_API_KEY env var'
+        required: true
+      NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY:
+        description: 'NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY env var'
+        required: true
+      ALGOLIA_ADMIN_API_KEY:
+        description: 'ALGOLIA_ADMIN_API_KEY env var'
+        required: true
+      SENTRY_WEBPACK_PLUGIN:
+        description: 'SENTRY_WEBPACK_PLUGIN env var'
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.inputs.branch || github.ref }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.ecr-push-role }}
+          aws-region: ${{ inputs.ecr-region }}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: v0.12.1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.ecr-registry }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        env:
+          AWS_REGION: ${{ inputs.ecr-region }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ${{ inputs.dockerfile }}
+          push: true
+          tags: ${{ inputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+            MAILING_USER=${{ secrets.MAILING_USER }}
+            NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER=${{ secrets.NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER }}
+            ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+            NEXT_PUBLIC_FILE_STORAGE_PROVIDER=${{ secrets.NEXT_PUBLIC_FILE_STORAGE_PROVIDER }}
+            FILE_STORAGE_PROVIDER=${{ secrets.FILE_STORAGE_PROVIDER }}
+            NEXT_PUBLIC_ALGOLIA_APP_ID=${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+            AWS_DYNAMO_DB_TABLE_NAME=${{ secrets.AWS_DYNAMO_DB_TABLE_NAME }}
+            MAILING_PASSWORD=${{ secrets.MAILING_PASSWORD }}
+            MAILING_DEFAULT_FROM=${{ secrets.MAILING_DEFAULT_FROM }}
+            ALGOLIA_APP_ID=${{ secrets.ALGOLIA_APP_ID }}
+            OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+            NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY=${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
+            ALGOLIA_ADMIN_API_KEY=${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+            SENTRY_WEBPACK_PLUGIN=${{ secrets.SENTRY_WEBPACK_PLUGIN }}
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          MAILING_USER: ${{ secrets.MAILING_USER }}
+          NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER: ${{ secrets.NEXT_PUBLIC_TWO_FACTOR_AUTH_PROVIDER }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          NEXT_PUBLIC_FILE_STORAGE_PROVIDER: ${{ secrets.NEXT_PUBLIC_FILE_STORAGE_PROVIDER }}
+          FILE_STORAGE_PROVIDER: ${{ secrets.FILE_STORAGE_PROVIDER }}
+          NEXT_PUBLIC_ALGOLIA_APP_ID: ${{ secrets.NEXT_PUBLIC_ALGOLIA_APP_ID }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_DYNAMO_DB_TABLE_NAME: ${{ secrets.AWS_DYNAMO_DB_TABLE_NAME }}
+          MAILING_PASSWORD: ${{ secrets.MAILING_PASSWORD }}
+          MAILING_DEFAULT_FROM: ${{ secrets.MAILING_DEFAULT_FROM }}
+          ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{ secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY }}
+          ALGOLIA_ADMIN_API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
+          SENTRY_WEBPACK_PLUGIN: ${{ secrets.SENTRY_WEBPACK_PLUGIN }}

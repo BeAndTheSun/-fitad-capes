@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/db/*": ["../../packages/db/src/*"],
+      "@/mailing/*": ["../../packages/mailing/src/*"],
+      "@/tasks/*": ["../../packages/tasks/src/*"],
+      "@/task-runner/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "tests", "jest.config.ts", "tsup.config.ts"]
+}

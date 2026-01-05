@@ -1,0 +1,136 @@
+# Vector Script Documentation
+
+This is a script that is designed to generate embeddings for data in a PostgreSQL database using OpenAI's API and stores the embeddings for efficient querying. The embeddings facilitate tasks like similarity search and natural language processing.
+
+## Content
+
+1. [Overview](#overview)
+2. [Setup](#setup)
+3. [Configuration](#configuration)
+4. [Functions](#functions)
+5. [Usage](#usage)
+
+## Overview
+
+The script performs the following tasks:
+
+- Connects to a PostgreSQL database.
+- Fetches and filters data from specified tables.
+- Generates text embeddings for rows using the OpenAI API.
+- Stores or updates embeddings in the database.
+- Provides functions for querying the embeddings based on similarity.
+
+---
+
+## Setup
+
+1. **Environment Variables**:
+   - `DATABASE_URL`: The PostgreSQL database URL. If not provided, the script will throw an error.
+2. **Dependencies**:
+   - `dotenv`: To load environment variables.
+   - `@meltstudio/ai`: For OpenAI API interaction.
+   - `drizzle-orm`: For ORM functionality with PostgreSQL.
+   - `postgres`: PostgreSQL client for database connection.
+   - `@clack/prompts`: For CLI prompts (intro and outro messages).
+
+---
+
+## Configuration
+
+### 1. **Database URL Check**
+
+This ensures that the DATABASE_URL is set.
+
+```ts
+const dbUrl = process.env.DATABASE_URL;
+if (dbUrl == null || dbUrl === '') {
+  throw new Error("environment variable 'DATABASE_URL' is missing");
+}
+```
+
+### 2. **Relation Configurations**
+
+Defines how tables are related for fetching associated data:
+
+- **`RelationConfig`**: Handles one-to-many relationships.
+- **`ManyToManyConfig`**: Manages many-to-many relationships.
+
+Example:
+
+```typescript
+const relationConfig: RelationConfig = {
+  workspace: [
+    {
+      relationTable: 'workspaceProfile',
+      foreignKey: 'workspaceId',
+      localKey: 'id',
+    },
+  ],
+};
+
+const manyToManyConfig: ManyToManyConfig = {
+  workspace: [
+    {
+      joinTable: 'userWorkspaces',
+      primaryForeignKey: 'workspaceId',
+      relatedForeignKey: 'userId',
+      relatedTable: 'users',
+    },
+  ],
+};
+```
+
+## Functions
+
+1. **filterRowData**
+
+Filters and prefixes row data to avoid embedding sensitive information.
+
+```ts
+function filterRowData(row: RowData, table: keyof typeof dbSchemas): RowData { ... }
+```
+
+2. **processRowData**
+
+Processes a single row, concatenates related data, and returns filtered data and concatenated text.
+
+```ts
+async function processRowData(row: RowData, table: keyof typeof dbSchemas): Promise<{ ... }> { ... }
+```
+
+3. **upsertEmbedding**
+
+Inserts or updates embeddings in the database using Drizzle.
+
+```ts
+async function upsertEmbedding(args: { ... }): Promise<void> { ... }
+```
+
+4. **embedRowsBatch**
+
+Generates embeddings for a batch of rows and upserts them into the database.
+
+```ts
+async function embedRowsBatch(table: keyof typeof dbSchemas, rows: RowData[]): Promise<void> { ... }
+```
+
+5. **queryEmbedding**
+
+Queries embeddings based on a user input and returns relevant results.
+
+```ts
+async function queryEmbedding(userQuery: string): Promise<string[] | null> { ... }
+```
+
+6. **fetchRowsPaginated**
+
+Fetches paginated rows from a table.
+
+```ts
+async function fetchRowsPaginated(table: keyof typeof dbSchemas, offset = 0, limit = 500): Promise<RowData[]> { ... }
+```
+
+## Usage
+
+    1.	Set Up Environment Variables: Ensure DATABASE_URL is configured.
+    2.	Run the Script: Use `yarn ai:vector-sync`

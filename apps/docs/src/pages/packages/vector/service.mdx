@@ -1,0 +1,232 @@
+# VectorDBService Documentation
+
+This a service designed to handle vector-based operations, like embedding data from a PostgreSQL database and managing embeddings with OpenAI. It allows the storage, updating, querying, and removal of data embeddings for efficient similarity searches using Drizzle ORM.
+
+# Content
+
+- [Overview](#overview)
+- [Dependencies](#dependencies)
+- [Configuration](#configuration)
+- [Class Description](#class-vectordbservice)
+- [Public Methods](#public-methods)
+- [Helper Methods](#helper-methods)
+
+## Overview
+
+This class is responsible for managing all interactions with the database. Its tasks include:
+
+1. **Data Retrieval**  
+   Fetching rows or specific data from tables, It can include or not pagination or filtering.
+
+2. **Data Insertion and Updates**  
+   Inserting new data or updating existing records in the database, including handling upserts (insert or update operations).
+
+3. **Data Filtering and Processing**  
+   Filtering out unwanted or sensitive information from data, transforming or processing row data before it’s stored or used.
+
+4. **Embedding Management**  
+   Managing the creation, updating, and storage of embeddings, which might involve upserting embeddings into a database table and ensuring data consistency.
+
+5. **Handling Relationships**  
+   Updating or embedding related data, ensuring proper handling of foreign key relationships or many-to-many associations.
+
+6. **Error Handling and Validation**  
+   Ensuring data integrity by validating inputs and handling potential errors that may occur during database operations.
+
+## Dependencies
+
+- **OpenAIClient**: Used to generate embeddings from text data.
+- **Drizzle ORM**: Handles database operations.
+- **Logger**: For logging important information and errors.
+
+## Configuration
+
+- `BATCH_SIZE`: The size of data batches to process at a time. Default is set to 50.
+- **Relation Configuration**:
+  - `relationConfig`: Defines one-to-many relationships between tables.
+  - `manyToManyConfig`: Defines many-to-many relationships using join tables.
+
+## Class: `VectorDBService`
+
+### Properties
+
+- `db`: An instance of `PostgresJsDatabase`, connected to the database.
+- `openai`: An instance of `OpenAIClient` for embedding operations.
+- `tableSchemas`: Schema definitions for tables in the database.
+
+---
+
+# VectorDBService Class Methods
+
+## Public Methods
+
+### 1. `embedAll()`
+
+Embeds all rows for all tables in the public schema.
+
+**Example Usage:**
+
+```ts
+const service = new VectorDBService();
+await service.embedAll();
+```
+
+### 2. `embedSomeTables`
+
+Embeds data from specific tables and handles pagination for processing in batches.
+
+```ts
+embedSomeTables(tables: (keyof typeof dbSchemas)[])
+```
+
+**Parameters**:
+
+- `tables`: An array of table names to embed.
+
+**Example Usage:**
+
+```ts
+const vectorDBService = new VectorDBService();
+await vectorDBService.embedSomeTables(['users', 'workspaces']);
+```
+
+### 3. `updateEmbedding`
+
+Updates the embedding of a specific row when the data changes.
+
+```ts
+updateEmbedding(table: keyof typeof dbSchemas, rowId: string)
+```
+
+**Parameters**:
+
+- `table`: The table name.
+- `rowId`: The ID of the row to update.
+
+### 4. `saveEmbedding`
+
+Saves a new embedding or updates an existing one in the embeddings table.
+
+```ts
+saveEmbedding(table: string, rowId: string, data: Record<string, unknown>, embedding: number[])
+```
+
+**Parameters**:
+
+- `table`: The name of the table.
+- `rowId`: The ID of the row.
+- `data`: The data to be saved.
+- `embedding`: The embedding vector.
+
+### 5. `removeEmbedding`
+
+Removes an embedding from the database using Drizzle ORM.
+
+```ts
+removeEmbedding(table: string, rowId: string)
+```
+
+**Parameters**:
+
+- `table`: The name of the table.
+- `rowId`: The ID of the row to remove.
+
+### 6. `queryEmbedding`
+
+Queries embeddings based on a user input and returns relevant results.
+
+```ts
+queryEmbedding(args: { userQuery: string; workspaceId?: string })
+```
+
+**Parameters**:
+
+- `args`: An object containing the user query and an optional workspace ID.
+
+## Helper Methods
+
+### 1. `filterRowData`
+
+Filters and prefixes row data to avoid embedding sensitive information.
+
+```ts
+filterRowData(row: RowData, table: keyof typeof dbSchemas)
+```
+
+**Parameters**:
+
+- `row`: The row data to filter.
+- `table`: The table name.
+
+### 2. `fetchRowsPaginated`
+
+Fetches rows from a table with pagination.
+
+```ts
+fetchRowsPaginated(table: keyof typeof dbSchemas, offset = 0, limit = 500)
+```
+
+**Parameters**:
+
+- `table`: The name of the table.
+- `offset`: The starting index for pagination.
+- `limit`: The number of rows to fetch.
+
+### 3. `embedRowsBatch`
+
+Generates embeddings for a batch of rows and upserts them into the database.
+
+```ts
+embedRowsBatch(table: keyof typeof dbSchemas, rows: RowData[], originTable?: keyof typeof dbSchemas)
+```
+
+**Parameters**:
+
+- `table`: The name of the table.
+- `rows`: An array of row data to embed.
+- `originTable?`:. The origin table.
+
+### 4. `processRowData`
+
+Processes a single row, concatenates related data, and returns filtered data and concatenated text.
+
+```ts
+processRowData(row: RowData, table: keyof typeof dbSchemas, originTable?: keyof typeof dbSchemas)
+```
+
+**Parameters**:
+
+- `row`: The row data to process.
+- `table`: The table name.
+- `originTable?`: The origin table.
+
+### 5. `upsertEmbedding`
+
+Inserts or updates an embedding in the embeddings table using Drizzle ORM.
+
+```ts
+upsertEmbedding(table: string, rowId: string, data: Record<string, unknown>, embedding: number[])
+```
+
+**Parameters**:
+
+- `table`: The table name.
+- `rowId`: The ID of the row.
+- `data`: The data to be saved.
+- `embedding`: The embedding vector.
+
+### 6. `updateRelatedEmbeddings`
+
+Updates related embeddings and ensure all related data is embedded.
+
+```ts
+updateRelatedEmbeddings(relatedTable: keyof typeof dbSchemas, originTable: keyof typeof dbSchemas, relatedIds: string[] = [], foreignKey?: string, primaryId?: string)
+```
+
+**Parameters**:
+
+- `relatedTable`: The name of the related table.
+- `originTable`: The origin table to avoid loops.
+- `relatedIds`: An array of related IDs for many-to-many relationships.
+- `foreignKey`: Optional. Foreign key for one-to-many relationships.
+- `primaryId`: Optional. The primary ID for one-to-many relationships.

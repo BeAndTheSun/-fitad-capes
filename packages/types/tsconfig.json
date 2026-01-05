@@ -1,0 +1,10 @@
+{
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/common-types/*": ["./src/*"]
+    }
+  },
+  "include": ["src"]
+}

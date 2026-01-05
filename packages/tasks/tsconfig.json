@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/tasks/*": ["src/*"],
+      "@/db/*": ["../../packages/db/src/*"],
+      "@/api/*": ["./src/*"],
+      "@/mailing/*": ["../../packages/mailing/src/*"],
+      "@/types/*": ["../../packages/types/src/*"],
+      "@/logger/*": ["../../packages/logger/src/*"]
+    }
+  },
+  "include": ["src", "tests", "tests", "jest.config.ts"]
+}

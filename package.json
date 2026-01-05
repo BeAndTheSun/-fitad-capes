@@ -1,0 +1,76 @@
+{
+  "name": "melt-turborepo-template",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "configs/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "ai:estimate-embedding-cost": "yarn workspace @meltstudio/ai ai:estimate-embedding-cost",
+    "ai:vector-sync": "yarn workspace @meltstudio/db ai:vector-sync",
+    "algolia:sync": "yarn workspace @meltstudio/db algolia:sync",
+    "build": "turbo run build",
+    "ci:checks": "turbo run lint type-check test:coverage --force --concurrency=100% && yarn test:coverage:merge",
+    "commit": "git-cz",
+    "db:check": "yarn workspace @meltstudio/db db:check",
+    "db:fixtures": "yarn workspace @meltstudio/db db:fixtures",
+    "db:generate": "yarn workspace @meltstudio/db db:generate",
+    "db:migrate": "yarn workspace @meltstudio/db db:migrate",
+    "db:super-admin": "yarn workspace @meltstudio/db db:super-admin",
+    "dev": "turbo run dev",
+    "dev:android": "turbo run dev:android",
+    "dev:ios": "turbo run dev:ios",
+    "dev:web": "turbo run dev:web",
+    "docs": "yarn workspace @meltstudio/docs dev",
+    "format": "prettier --write .",
+    "i18n:check": "turbo run i18n:check",
+    "i18n:scan": "node scripts/scan-translations.mjs",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint --force --continue -- --fix",
+    "postinstall": "patch-package",
+    "prepare": "husky install",
+    "task-runner:cli": "yarn workspace @meltstudio/task-runner cli",
+    "task-runner:docker": "docker build -t task-runner:latest -f apps/task-runner/Dockerfile .",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage -- -o --concurrency=100% && yarn test:coverage:merge",
+    "test:coverage:merge": "istanbul-merge --out ./coverage/coverage-final.json packages/**/coverage/coverage-final.json apps/web/coverage/coverage-final.json && nyc report --reporter html --reporter text -t coverage --report-dir coverage/lcov-report",
+    "toolkit:plugins": "yarn workspace @meltstudio/toolkit toolkit:plugins",
+    "type-check": "turbo run type-check"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.7",
+    "@commitlint/config-conventional": "^17.6.7",
+    "@ls-lint/ls-lint": "2.1.0-beta.0",
+    "@meltstudio/prettier-config": "^1.1.2",
+    "commitizen": "^4.3.0",
+    "cross-env": "^7.0.3",
+    "cz-git": "^1.9.4",
+    "eslint": "^8.57.0",
+    "husky": "^8.0.3",
+    "istanbul-merge": "^2.0.0",
+    "lint-staged": "^13.2.3",
+    "nyc": "^17.1.0",
+    "patch-package": "^8.0.0",
+    "prettier": "^3.1.0",
+    "prettier-eslint": "^16.1.2",
+    "rimraf": "^5.0.1",
+    "syncpack": "^12.4.0",
+    "ts-node": "^10.9.1",
+    "turbo": "^1.10.12"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git",
+      "useEmoji": true
+    }
+  },
+  "packageManager": "yarn@1.22.17",
+  "resolutions": {
+    "react": "^18.3.1"
+  }
+}

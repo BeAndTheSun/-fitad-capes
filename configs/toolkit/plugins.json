@@ -1,0 +1,12 @@
+{
+  "apps": {
+    "docs": true,
+    "mobile": true,
+    "server": true
+  },
+  "packages": {
+    "feature-flags": true,
+    "mailing": true,
+    "algolia-client": true
+  }
+}

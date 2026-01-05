@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/db/*": ["../../packages/db/src/*"],
+      "@/mailing/*": ["../../packages/mailing/src/*"],
+      "@/theme/*": ["../../packages/theme/src/*"],
+      "@/api/*": ["../../packages/api/src/*"],
+      "@/ui/*": ["../../packages/ui/src/*"],
+      "@/feature-flags/*": ["../../packages/feature-flags/src/*"],
+      "@/client-common/*": ["../../packages/client-common/src/*"],
+      "@/common/*": ["../../packages/common/src/*"],
+      "@/common-types/*": ["../../packages/types/src/*"],
+      "@/zod-schemas/*": ["../../packages/zod-schemas/src/*"],
+
+      "@/config/*": ["./src/config/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/layouts/*": ["./src/layouts/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/pages": ["./src/pages"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/middleware/*": ["./src/server/middleware/*"],
+      "@/next-i18next.config": ["./next-i18next.config"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "src",
+    "tests",
+    "jest.config.ts",
+    "tailwind.config.js",
+    "sentry.client.config.ts",
+    "sentry.edge.config.ts",
+    "sentry.server.config.ts",
+    ".next/types/**/*.ts",
+    "types/next-i18next-config.d.ts"
+  ],
+  "plugins": [{ "name": "next" }]
+}

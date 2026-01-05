@@ -1,0 +1,33 @@
+{
+  "name": "@meltstudio/toolkit",
+  "version": "0.0.0",
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "jscodeshift": "^17.1.1",
+    "prettier": "^3.1.0"
+  },
+  "devDependencies": {
+    "@meltstudio/eslint-config": "^2.1.3",
+    "@meltstudio/tsconfig": "^2.0.1",
+    "@types/jscodeshift": "^0.12.0",
+    "@typescript-eslint/eslint-plugin": "^6.2.0",
+    "@typescript-eslint/parser": "^6.2.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.1.0",
+    "eslint-config-prettier": "^8.9.0",
+    "eslint-import-resolver-typescript": "^3.5.5",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-simple-import-sort": "^10.0.0",
+    "tsx": "^3.12.10",
+    "typescript": "^5.2.2"
+  },
+  "main": "src/index.ts",
+  "private": true,
+  "scripts": {
+    "toolkit:plugins": "node --import tsx src/index.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "type": "module"
+}

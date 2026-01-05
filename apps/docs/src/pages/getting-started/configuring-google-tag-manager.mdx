@@ -1,0 +1,76 @@
+## Configuring Google Tag Manager
+
+This guide walks you through the necessary steps for configuring google tag manager and google analytics
+
+1. Create a Google Analytics account use this google docs and follow the steps https://support.google.com/analytics/answer/9304153?hl=es-419
+2. Create account and container on google tag manager, please use this guide that provide us google https://support.google.com/tagmanager/answer/14842164?hl=en
+3. Create a new Tag
+
+   - Go to tags page
+   - Click "New" button
+   - In tag configuration choose Google Analytics and "Google Tag" tag type
+   - In the field Tag Id add the Google Analytics Id (use this guide to get your tag Id https://support.google.com/tagmanager/answer/15107467?hl=en#zippy=%2Cin-google-ads%2Cin-google-analytics%2Cin-campaign-manager%2Cin-google-tag-manager)
+   - Add a trigger, in this case we use the trigger view page (All pages) to know which pages are loaded, use the trigger that you need
+   - when we finish to configure the tag click in "Save" button
+
+4. On the app, go to admin panel /admin/google-tag-manager
+5. Fill the form with the google tag manager Id (use this guide to get your tag Id https://support.google.com/tagmanager/answer/15107467?hl=en#zippy=%2Cin-google-ads%2Cin-google-analytics%2Cin-campaign-manager%2Cin-google-tag-manager)
+6. After do any change in the configurations we can test it before to publish the changes
+
+   - In overview page we had at the top - right of the page the button "Preview" and "Submit"
+   - Click the "Preview button", this option are going to open another tab
+   - Fill the gap with the url site where you want to test the changes
+   - This are going to open a new tab with the new page in debugging mode
+   - now you can see the events in google analytics debug view https://support.google.com/analytics/answer/7201382?hl=en
+
+7. When we finish all the configurations and tests we need to publish the changes to be able to test it in all environments
+
+   - In overview page we had at the top - right of the page the button "Preview" and "Submit"
+   - Click "Submit" button and fill the gaps, the name version and the description and click in "Publish" button
+
+## Config to get all post events on Google Analytics
+
+Now with the previous configuration we can get all the events when you navigate for all the application, now we also have additional configurations to be able to send all post request with their body to Google Analytics
+
+1. Create a new variable
+
+   - Go to Variables page
+   - Click "New" button
+   - Choose Data Layer Variable
+   - the name for this variable should be body
+   - Click in "Save" button
+
+2. Create a new trigger
+
+   - Go to Triggers page
+   - Click "New" button
+   - Choose Custom event
+   - In event name we need to use the follow syntax, mutation_your_end_point
+
+   Example: we have the end point admin/updateGTMId to update the Google tag Manager Id, in this case the name of the event will be
+   mutation_admin_updateGTMId
+
+   - Click in "Save" button
+
+3. Create a new tag
+
+   - Go to tags page
+   - Click "New" button
+   - In tag configuration choose Google Analytics and "Google Analytics: GA4 Event" tag type
+   - In the field Measurement ID add the Google Analytics Id (use this guide to get your tag Id https://support.google.com/tagmanager/answer/15107467?hl=en#zippy=%2Cin-google-ads%2Cin-google-analytics%2Cin-campaign-manager%2Cin-google-tag-manager)
+   - In event name we need to use the follow syntax, mutation_your_end_point
+
+     Example: we have the end point admin/updateGTMId to update the Google tag Manager Id, in this case the name of the event will be
+     mutation_admin_updateGTMId
+
+   - In event parameters add the variable body that we created in the last step
+   - Do the same for the value, use the same variable body
+   - Add a trigger, in this case we use a custom event that we created in the previous step
+   - when we finish to configure the tag click in "Save" button
+
+note: is important to use the same event name in the trigger and the tag to e able to see the events in google analytics
+
+4. When we finish all the configurations and tests we need to publish the changes to be able to test it in all environments
+
+   - In overview page we had at the top - right of the page the button "Preview" and "Submit"
+   - Click "Submit" button and fill the gaps, the name version and the description and click in "Publish" button

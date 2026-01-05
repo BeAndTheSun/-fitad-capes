@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "extends": [
+    "@meltstudio/eslint-config/node-ts",
+    "@meltstudio/eslint-config/jest-overrides"
+  ],
+  "rules": {
+    "import/no-default-export": "off"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": ["packages/*/tsconfig.json", "tsconfig.json"]
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "pipeline": {
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "dev:android": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "dev:ios": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "dev:web": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    },
+    "lint": {
+      "cache": true
+    },
+    "type-check": {
+      "cache": true
+    },
+    "test": {
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "jest.config.ts",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "tests/**/*.tsx",
+        "tests/**/*.ts"
+      ],
+      "env": ["COLLECT_COVERAGE"]
+    },
+    "test:coverage": {
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "jest.config.ts",
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "tests/**/*.tsx",
+        "tests/**/*.ts"
+      ],
+      "env": ["COLLECT_COVERAGE"]
+    },
+    "i18n:scan": {
+      "outputs": ["src/locales/**"]
+    },
+    "i18n:check": {
+      "dependsOn": ["i18n:scan"],
+      "cache": true
+    }
+  }
+}

@@ -1,0 +1,18 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+yarn ls-lint
+yarn syncpack list-mismatches
+yarn lint-staged
+yarn type-check
+yarn lint
+
+# Check if HEAD^1 exists (i.e., if there's a previous commit)
+if git rev-parse --verify HEAD^1 >/dev/null 2>&1; then
+  yarn test:coverage --filter=[HEAD^1] -- -o
+  yarn i18n:check --filter=[HEAD^1]
+else
+  # Initial commit - run without filter
+  yarn test:coverage -- -o
+  yarn i18n:check
+fi

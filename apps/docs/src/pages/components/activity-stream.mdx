@@ -1,0 +1,217 @@
+# Activity Stream Documentation
+
+The **Activity Stream** functionality in this project allows for tracking and logging various actions (e.g., create, update, delete) performed on database models. These actions are logged to provide auditing, notifications, or historical records in admin interfaces or user-facing features.
+
+---
+
+## Key Concepts
+
+### 1. **Activity Actions**
+Activity actions represent the type of operation performed on a model. These are defined in the `ActivityActions` enum and include:
+- `CREATE`
+- `UPDATE`
+- `DELETE`
+
+### 2. **Activity Stream Data**
+Activity stream data is metadata associated with an activity. It includes:
+- `workspaceId`: The ID of the workspace where the action occurred.
+- `userId`: The ID of the user who performed the action.
+
+### 3. **Admin CRUD Operations**
+For CRUD operations performed in the **Admin Panel**, the `workspaceId` is **not required**. The activity stream is still logged, but it only tracks the user ID and the performed action.
+
+---
+
+## Usage in Database Models
+
+Each database model that supports activity streams must implement the following:
+
+1. **`activityStream` Getter**  
+   This should return `true` to enable activity stream logging for the model.
+
+2. **`logActivity` Method**  
+   Used internally to log the activity to the database.
+
+---
+
+## Methods Overview
+
+### 1. **`logActivity`**
+
+#### Description:
+Logs an activity for a model.
+
+#### Parameters:
+- `pk`: The primary key of the affected record (optional for `CREATE` actions).
+- `eventType`: The action type (`CREATE`, `UPDATE`, `DELETE`).
+- `workspaceId`: The workspace where the action occurred.
+- `userId`: The user who performed the action.
+- `newChanges`: The new data after the action.
+- `oldChanges`: The old data before the action (optional, used for `UPDATE`).
+
+#### Example:
+```ts
+await this.logActivity({
+  pk,
+  eventType: ActivityActions.UPDATE,
+  workspaceId: 'workspace123',
+  userId: 'user456',
+  newChanges: { name: 'Updated Name' },
+  oldChanges:{ name: 'Old Name' }
+});
+```
+
+---
+
+### 2. **Activity-Enabled CRUD Operations**
+
+The following CRUD methods automatically integrate with the activity stream if `activityStream` is enabled for a model:
+
+#### a. **`create`**
+Logs a `CREATE` action with the new data.
+
+#### Example:
+```ts
+const newRecord = await modelInstance.create({
+  data: { name: 'New Record' },
+  activityStreamData: {
+    workspaceId: 'workspace123',
+    userId: 'user456',
+  },
+});
+```
+
+#### b. **`update`**
+Logs an `UPDATE` action with the new data and optionally fetches old data for comparison.
+
+#### Example:
+```ts
+const updatedRecord = await modelInstance.update({
+  pk: 'record123',
+  data: { name: 'Updated Record' },
+  activityStreamData: {
+    workspaceId: 'workspace123',
+    userId: 'user456',
+  },
+});
+```
+
+#### c. **`delete`**
+Logs a `DELETE` action, including old data if available.
+
+#### Example:
+```ts
+await modelInstance.delete({
+  pk: 'record123',
+  activityStreamData: {
+    workspaceId: 'workspace123',
+    userId: 'user456',
+  },
+});
+```
+
+---
+
+### 3. **Admin CRUD Operations**
+
+For Admin CRUD, the `workspaceId` is not required. Use the following methods with simplified activity stream data:
+
+#### Example for Admin Create:
+```ts
+const newRecord = await modelInstance.createByAdmin({
+  data: { name: 'New Record' },
+  activityStreamData: {
+    userId: 'user456',
+  },
+});
+```
+
+#### Example for Admin Update:
+```ts
+const updatedRecord = await modelInstance.updateByAdmin({
+  pk: 'record123',
+  data: { name: 'Updated Record' },
+  activityStreamData: {
+    userId: 'user456',
+  },
+});
+```
+
+#### Example for Admin Delete:
+```ts
+await modelInstance.deleteByAdmin({
+  fieldName: 'id',
+  value: 'record123',
+  activityStreamData: {
+    userId: 'user456',
+  },
+});
+```
+
+---
+
+### 4. **Custom CRUD Methods**
+If you create custom methods for CRUD operations in a model, you **must explicitly add the activity stream logic** to those methods by calling the `logActivity` method.  
+
+#### Example:
+```ts
+public async customMethodExample({
+  data,
+  activityStreamData,
+}: {
+  data: { key: string };
+  activityStreamData?: ActivityStreamData;
+}) {
+  const pk = '123'; // Example of getting the primary key after some logic
+  const newChanges = { key: 'value' };
+
+  if (activityStreamData) {
+    await this.logActivity({
+      pk,
+      eventType: ActivityActions.CREATE,
+      workspaceId: null, // No workspaceId required for Admin
+      userId: activityStreamData.userId,
+      newChanges
+  });
+  }
+}
+```
+
+---
+
+## Integration Points
+
+### 1. **Database Table History**
+   The `logActivity` method creates a record in the `tablesHistory` table with the following fields:
+   - `userId`: The user performing the action.
+   - `tableName`: The name of the database table.
+   - `action`: The action type (e.g., `CREATE`, `UPDATE`, `DELETE`).
+   - `workspaceId`: The workspace ID (optional for Admin CRUD).
+   - `actionDescription`: A JSON object containing `new` and `old` data.
+
+---
+
+## Best Practices
+
+1. **Consistency:** Ensure all models with activity streams have a properly implemented `activityStream` getter.
+2. **Admin CRUD:** Remember that Admin CRUD operations do not require a `workspaceId`, but you must still provide the `userId` for accurate logging.
+3. **Custom CRUD Methods:** If you add custom CRUD operations, ensure the `logActivity` method is included to track actions.
+4. **Data Privacy:** Exclude sensitive fields from `actionDescription` in the `logActivity` method.
+
+---
+
+## FAQ
+
+### Q1: How do I enable activity streams for a model?
+   - Override the `activityStream` getter to return `true` in the model class.
+
+### Q2: Can I disable logging for specific operations?
+   - Yes, by skipping the `activityStreamData` parameter when calling the CRUD methods.
+
+### Q3: What happens if logging fails?
+   - Logging errors are caught and logged using the `console.error` function, but they do not block the main operation.
+
+### Q4: Do I need to manually call `logActivity` in built-in CRUD methods?
+   - No, the `create`, `update`, and `delete` methods already handle this. You only need to add `logActivity` to custom CRUD methods.
+
+---

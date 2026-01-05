@@ -1,0 +1,166 @@
+# Metrics
+
+## Overview
+
+The metrics system is a tracking of various metrics within a workspace. The system is designed to allow developers to easily add new metrics over time by defining SQL queries and integrating them into the existing structure. The current implementation tracks user-related metrics, but the framework is flexible enough to support additional types of metrics.
+
+## Components
+
+- **metricsRouter**: The main API endpoint responsible for fetching various metrics. It routes requests based on the metric type and interacts with the database to fetch the relevant data.
+- **getUsersOverTime**: A database query function that fetches the count of users created over time for a specific workspace. New metric queries can follow this same structure for different use cases. This function uses a SQL query to return data grouped by day over the last 30 days.
+- **generateDatesFrom28DaysAgo**: A utility function reusable that generates a list of date strings for the past 28 days (including today). This ensures that metrics always return a complete dataset, even if some dates have no data (filled with default values such as 0).
+- **useFetchMetrics**: A React hook that is used to fetch metrics data from the backend.
+- **MetricsDashboard**: A frontend component where the useFetchMetrics hook is used to display metric data. It handles data fetching, loading states, and error handling, and passes the fetched data to the MetricLineChart component for visualization.
+- **MetricLineChart**: A reusable UI component that renders metrics data as a line chart using Recharts. It accepts an array of metric data (with date and count properties) and provides labels for the X and Y axes.
+
+## How to use it if you want to add a new metric
+
+### 1. metricsRouter
+
+Add a new case in the switch statement to recognize and handle your new metric.
+
+#### Example:
+
+```ts
+enum QueryType {
+  USERS_OVER_TIME = 'USERS_OVER_TIME',
+  NEW_METRIC_NAME = 'NEW_METRIC_NAME', // Add a new case
+}
+
+export const metricsRouter = ctx.router(metricsApiDef);
+
+metricsRouter.post('/', async (req, res) => {
+  if (req.auth == null) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  try {
+    const { metric, workspaceId } = req.body;
+
+    let data;
+
+    switch (metric as QueryType) {
+      case QueryType.USERS_OVER_TIME:
+        data = await db.user.getUsersOverTime(workspaceId);
+        break;
+      case QueryType.NEW_METRIC_NAME: // Your new case
+        data = await db.user.getNewMetricData(); // Call your new query
+        break;
+      default:
+        throw new Error('Unknown metric');
+    }
+
+    return res.status(200).json(data);
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ error: 'Error fetching data from PostgreSQL' });
+  }
+});
+```
+
+### 2. getNewMetricData
+
+To add a new metric, you need to create a new SQL query that retrieves the necessary data from the database. Create the Database Query: Write the function that runs the SQL query for the new metric. For instance, if you're adding a metric to track interactions over time:
+
+```ts
+
+public async getNewMetricData(): Promise<Metrics[]> {
+  // SQL to retrieve data for the new metric
+}
+
+```
+
+#### Important
+
+Use generateDatesFrom28DaysAgo to generate a date range covering the past 28 days. This ensures that even if there’s no data for a specific day, the chart will display a "0" instead of leaving the day empty.
+
+### 3. MetricsDashboard
+
+To display the new metric on the frontend, Call useFetchMetrics in your component, passing the new metric name.
+
+#### Example:
+
+```tsx
+type Metric = {
+  date: string;
+  count: number;
+};
+
+export const MetricsDashboard: React.FC = () => {
+  const { t } = useTranslation();
+  const { selectedWorkspace } = useSessionUser();
+
+  const {
+    data: userData,
+    error: userError,
+    isLoading: isUserLoading,
+  } = useFetchMetrics({
+    metric: 'USERS_OVER_TIME',
+    workspaceId: selectedWorkspace?.id ?? '',
+  });
+
+  const {
+    data: newData,
+    error: newError,
+    isLoading: isNewLoading,
+  } = useFetchMetrics({
+    metric: 'NEW_METRIC_NAME', // Call your new metric with the hook
+  });
+
+  // Add the loanding of your new metric
+  if (isUserLoading) {
+    return (
+      <div>
+        <Trans>Loading</Trans>...
+      </div>
+    );
+  }
+
+  // Add the error of your new metric
+  if (userError) {
+    return (
+      <div>
+        <Trans>Error loading data</Trans>.
+      </div>
+    );
+  }
+
+  const formattedUserData =
+    userData?.map((item: Metric) => ({
+      date: item.date,
+      counts: item.count,
+    })) ?? [];
+
+  // Format your new data
+  const formattedNewData =
+    newData?.map((item: Metric) => ({
+      date: item.date,
+      counts: item.count,
+    })) ?? [];
+
+  return (
+    <div className="space-y-8">
+      <Typography.Paragraph>
+        <Trans>Users created over time in the workspace</Trans>
+      </Typography.Paragraph>
+      <MetricLineChart
+        data={formattedUserData}
+        yAxisLabel={t('users')}
+        xAxisLabel={t('date')}
+      />
+      // Once you have the data, pass it to the reusable MetricLineChart UI
+      component to display it:
+      <MetricLineChart
+        data={formattedNewData} // The formatted metric data
+        yAxisLabel="New Metric"
+        xAxisLabel="Date"
+      />
+    </div>
+  );
+};
+```
+
+## Conclusion
+
+The metrics system provides a streamlined and flexible way to track and display various metrics within a workspace. To add a new metric, developers only need to make minimal changes by updating the metricsRouter in the backend and adding a new SQL query. On the frontend, the useFetchMetrics hook and the reusable MetricLineChart component make it easy to display the new metric. This design ensures that the process of adding new metrics is efficient, consistent, and scalable across the entire system.

@@ -1,0 +1,106 @@
+## Configuring the Admin Panel
+
+To configure the admin panel for your application, you need to define model schemas and model configurations. Below are the steps and examples for setting up these configurations.
+
+### 1. Define Model Schemas
+
+In your `modelSchemas` file, you should export the schemas that will be used for your models. These schemas typically include the structure for both the display and insert operations.
+
+**Example:**
+
+```typescript
+export const modelSchemas = {
+  users: userAdminModelSchema,
+} as const;
+
+export const insertModelSchemas = {
+  users: insertUserSchema,
+};
+```
+
+### Model Schemas
+
+- **modelSchemas**: This object maps model names (like `users`) to their corresponding schema. The `userAdminModelSchema` defines how the user data should be structured when displayed in the admin panel.
+
+- **insertModelSchemas**: This object defines the schema for inserting new records. The `insertUserSchema` includes fields required for creating a new user.
+
+### 2. Admin Configuration
+
+In your `config/admin.ts` file, you need to specify the configuration for each model you want to show in the admin panel. This includes details like display names, URL paths, fields to show, and any relations.
+
+**Example:**
+
+```typescript
+export const modelsConfig: ModelConfig = {
+  users: {
+    name: 'users',
+    displayName: 'Users',
+    url: 'users',
+    fields: [
+      { label: 'ID', type: 'ID', key: 'id' },
+      { label: 'Name', type: 'text', key: 'name' },
+      { label: 'Email', type: 'email', key: 'email' },
+      { label: 'Active', type: 'boolean', key: 'active' },
+      {
+        label: 'Role',
+        type: 'select',
+        key: 'role',
+        options: [
+          {
+            label: 'Member',
+            value: UserRoleEnum.MEMBER,
+          },
+          {
+            label: 'Admin',
+            value: UserRoleEnum.ADMIN,
+          },
+          {
+            label: 'Super Admin',
+            value: UserRoleEnum.SUPER_ADMIN,
+          },
+        ],
+      },
+      { label: 'Password', type: 'password', key: 'password' },
+    ],
+    schema: userAdminModelSchema.pick({
+      name: true,
+      email: true,
+      active: true,
+      role: true,
+      password: true,
+    }),
+    manyRelations: {
+      workspaces: {
+        label: 'Workspaces',
+        key: 'workspaces',
+        relationModel: 'workspace',
+      },
+    },
+    sidebar: true,
+  },
+};
+```
+
+## Explanation of the `modelsConfig` Object
+
+- **name**: The internal name of the model (e.g., `users`).
+
+- **displayName**: A human-readable name for the model to be displayed in the admin UI.
+
+- **url**: The URL path for accessing this model's admin interface.
+
+- **fields**: An array defining the fields to be displayed in the admin interface. Each field includes:
+
+  - **label**: The label shown to the user.
+  - **type**: The type of input (e.g., text, email, boolean, select, etc.).
+  - **key**: The key used to reference the data in the model.
+
+- **schema**: A schema derived from the main model schema, picking only the necessary fields for display or manipulation in the admin panel.
+
+- **manyRelations**: This defines relationships with other models. In this example, it specifies that users can have many workspaces. It includes:
+
+  - **label**: The label for the relation.
+  - **key**: The key used to identify the relation in the data structure.
+  - **relationModel**: The name of the related model (e.g., `workspace`).
+
+- **sidebar**: A boolean indicating whether this model should be included in the admin sidebar navigation.

@@ -1,0 +1,9 @@
+# Adding new integrations (Zapier, Shopify, etc.)
+
+To add a new integration, you need to:
+
+1. Add a new value to the `platform` enum in DB
+2. Extend the `Integration` class at `packages\common\src\handlers\integrations\base.ts` and implement the specified fields
+3. Include it in the INTEGRATIONS array in `packages\common\src\handlers\integrations\index.ts`
+4. Add the new platform to the `IntegrationKeys` enum in `packages\types\src\site-integrations.ts`
+5. Setup the required keys in `apps\web\src\hooks\use-integration-keys-by-platform.ts`

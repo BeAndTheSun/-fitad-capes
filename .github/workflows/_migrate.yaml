@@ -1,0 +1,35 @@
+name: Run migrations on the database
+
+on:
+  workflow_call:
+    secrets:
+      db_uri:
+        description: 'Database url including the user and password'
+        required: true
+    inputs:
+      environment:
+        description: 'The deploy environment'
+        required: true
+        type: string
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Setup node with cache'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Check DB migrations
+        run: yarn db:check
+        env:
+          DATABASE_URL: ${{ secrets.db_uri }}
+      - name: Run database migrations
+        run: yarn db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.db_uri }}

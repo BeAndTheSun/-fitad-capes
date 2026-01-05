@@ -1,0 +1,72 @@
+# Mailing Email Template Sending Service
+
+This Node.js module provides a reusable function to send email templates using Nodemailer. It supports dynamic content based on template props and integrates with React Email for HTML generation.
+
+**Key Features:**
+
+- Sends emails using Nodemailer
+- Utilizes React Email for templating with dynamic content
+- Configurable for different environments (production and development)
+
+
+
+
+## Creating Email Templates
+
+To create a new email template, follow these steps:
+
+1. **Create a new `.tsx` file:** Place the file within the `emails` directory.
+2. **Import necessary components:** Import any required components from `@react-email/components`.
+3. **Define template structure:** Use JSX to structure your email content. Refer to the `@react-email/components` documentation for available components and styling options.
+4. **Export the template component:** Export the component as the default export of the file.
+
+
+**Registering the template:**
+
+To use the template in the `sendEmailTemplate` function, add it to the `TEMPLATES` object:
+
+```javascript
+const TEMPLATES = {
+  welcome: Welcome,
+  // ... other templates
+} as const;
+```
+
+By following these steps, you can create reusable email templates that can be dynamically populated with data using the `props` parameter in the `sendEmailTemplate` function.
+
+**Usage**
+
+```javascript
+import { sendEmailTemplate } from './email-sender';
+
+// Example usage
+const welcomeEmailOptions = {
+  from: '<>',
+  to: '<>',
+  subject: 'Welcome to YourProjectName!',
+};
+
+const welcomeTemplateData = {
+  name: 'John Doe',
+  // Add other template-specific props
+};
+
+sendEmailTemplate({
+  template: 'welcome', // Replace with the desired template ID
+  options: welcomeEmailOptions,
+  props: welcomeTemplateData, // Optional for dynamic content
+});
+
+```
+
+**Local Development**
+
+To preview your email templates locally, you can start a development server:
+
+```bash
+yarn dev
+```
+
+This will launch a development server at http://localhost:3001. Any changes made to your email templates will be reflected in the browser automatically.
+
+**Note:** This feature is primarily for development and testing purposes. For production environments, use the `sendEmailTemplate` function to send emails as described in the `Usage` section.

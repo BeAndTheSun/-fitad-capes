@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/react.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/theme/*": ["../theme/src/*"],
+      "@/ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "tests", "tailwind.config.js", "jest.config.ts"]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@meltstudio/tsconfig/node18.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "paths": {
+      "@/mailing/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src",
+    "tests",
+    "src/emails",
+    "tailwind.config.js",
+    "jest.config.ts",
+    "jest.setup.ts"
+  ]
+}
