@@ -36,23 +36,23 @@ jobs:
     secrets:
       db_uri: ${{ secrets.DATABASE_URL }}
 
-  # deploy-web:
-  # name: Deploy to vercel
-  # uses: ./.github/workflows/_deploy_vercel.yaml
-  # permissions:
-  # contents: write
-  # issues: write
-  # pull-requests: write
-  # with:
-  # environment: Production
-  # github-comment: false
-  # build-cache-path: apps/web
-  # version: ${{ needs.release.outputs.new_release_version }}
-  # secrets:
-  # vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
-  # vercel-project-id: ${{ secrets.VERCEL_WEB_PROJECT_ID }}
-  # vercel-token: ${{ secrets.VERCEL_TOKEN }}
-  # github-token: ${{ secrets.GITHUB_TOKEN }}
+  deploy-web:
+    name: Deploy to vercel
+    uses: ./.github/workflows/_deploy_vercel.yaml
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    with:
+      environment: Production
+      github-comment: false
+      build-cache-path: apps/web
+      version: ${{ needs.release.outputs.new_release_version }}
+    secrets:
+      vercel-team-id: ${{ secrets.VERCEL_ORG_ID }}
+      vercel-project-id: ${{ secrets.VERCEL_WEB_PROJECT_ID }}
+      vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      github-token: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
 
   # deploy-task-runner:
   # name: Deploy Task Runner
