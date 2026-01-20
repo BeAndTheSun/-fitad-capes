@@ -28,13 +28,13 @@ jobs:
   #   secrets:
   #     semantic_release_token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
 
-  # migrate:
-  # name: Run the migrations on the database
-  # uses: ./.github/workflows/_migrate.yaml
-  # with:
-  # environment: Production
-  # secrets:
-  # db_uri: ${{ secrets.DATABASE_URL }}
+  migrate:
+    name: Run the migrations on the database
+    uses: ./.github/workflows/_migrate.yaml
+    with:
+      environment: Production
+    secrets:
+      db_uri: ${{ secrets.DATABASE_URL }}
 
   # deploy-web:
   # name: Deploy to vercel
