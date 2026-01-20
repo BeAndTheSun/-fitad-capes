@@ -50,6 +50,12 @@ export const usersApiDef = makeApi([
           name: z.string().optional(),
           email: z.string().optional(),
           profileImage: z.string().nullable().optional(),
+          trainerName: z.string().optional(),
+          trainerPhone: z.string().optional(),
+          trainerEmail: z.string().optional(),
+          trainerAddress: z.string().optional(),
+          trainerSocialUrl: z.string().optional(),
+          trainerBio: z.string().optional(),
         }),
       },
       {

@@ -19,6 +19,12 @@ export const users = pgTable('users', {
   is2faEnabled: boolean().notNull().default(false),
   secret2fa: varchar({ length: 256 }),
   profileImage: text(),
+  trainerName: varchar({ length: 256 }),
+  trainerPhone: varchar({ length: 64 }),
+  trainerEmail: varchar({ length: 256 }),
+  trainerAddress: text(),
+  trainerSocialUrl: text(),
+  trainerBio: text(),
   isSuperAdmin: boolean().notNull().default(false),
   gtmId: varchar().default(''),
 });

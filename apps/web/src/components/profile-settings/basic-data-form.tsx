@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  Textarea,
   toast,
 } from '@/theme/index';
 import { FileInput } from '@/ui/file-upload';
@@ -28,6 +29,19 @@ import { ImagePreview, ImagePreviewLoadErrorAction } from '@/ui/image-preview';
 const profileFormSchema = z.object({
   name: z.string(),
   email: z.string().email(),
+  trainerName: z.string().optional(),
+  trainerPhone: z.string().optional(),
+  trainerEmail: z
+    .string()
+    .optional()
+    .refine(
+      (val) =>
+        !val || val.trim() === '' || z.string().email().safeParse(val).success,
+      { message: 'Please enter a valid email address' }
+    ),
+  trainerAddress: z.string().optional(),
+  trainerSocialUrl: z.string().optional(),
+  trainerBio: z.string().optional(),
   photo: z.object({
     newFile: z.instanceof(File).optional(),
   }),
@@ -54,6 +68,12 @@ export const BasicDataForm: React.FC<BasicDataFormProps> = ({
     values: {
       name: user.name,
       email: user.email,
+      trainerName: user.trainerName ?? '',
+      trainerPhone: user.trainerPhone ?? '',
+      trainerEmail: user.trainerEmail ?? '',
+      trainerAddress: user.trainerAddress ?? '',
+      trainerSocialUrl: user.trainerSocialUrl ?? '',
+      trainerBio: user.trainerBio ?? '',
       photo: {
         newFile: undefined,
       },
@@ -95,6 +115,11 @@ export const BasicDataForm: React.FC<BasicDataFormProps> = ({
   const handleSubmitProfileForm = async (
     values: ProfileFormValues
   ): Promise<void> => {
+    const normalize = (value?: string | null): string | undefined => {
+      const trimmedValue = value?.trim();
+      return trimmedValue || undefined;
+    };
+
     const newFileData = newPhotoFile
       ? await uploadFile(newPhotoFile)
       : undefined;
@@ -105,7 +130,24 @@ export const BasicDataForm: React.FC<BasicDataFormProps> = ({
       newFileKey = null;
     }
 
-    updateOwnUser({ ...values, profileImage: newFileKey });
+    const { photo: _photo, ...rest } = values;
+
+    const payload = {
+      ...rest,
+      trainerName: normalize(values.trainerName),
+      trainerPhone: normalize(values.trainerPhone),
+      trainerEmail: normalize(values.trainerEmail),
+      trainerAddress: normalize(values.trainerAddress),
+      trainerSocialUrl: normalize(values.trainerSocialUrl),
+      trainerBio: normalize(values.trainerBio),
+      profileImage: newFileKey,
+    };
+
+    const cleanedPayload = Object.fromEntries(
+      Object.entries(payload).filter(([, value]) => value !== undefined)
+    ) as typeof payload;
+
+    updateOwnUser(cleanedPayload);
   };
 
   const handleClearPhoto = async (): Promise<void> => {
@@ -146,6 +188,98 @@ export const BasicDataForm: React.FC<BasicDataFormProps> = ({
                 </FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid gap-2 md:grid-cols-2">
+          <FormField
+            control={profileForm.control}
+            name="trainerName"
+            render={({ field }): React.ReactElement => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Trainer name (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={profileForm.control}
+            name="trainerPhone"
+            render={({ field }): React.ReactElement => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Phone number (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={profileForm.control}
+            name="trainerEmail"
+            render={({ field }): React.ReactElement => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Contact email (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input type="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={profileForm.control}
+            name="trainerSocialUrl"
+            render={({ field }): React.ReactElement => (
+              <FormItem>
+                <FormLabel>
+                  <Trans>Social media page (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={profileForm.control}
+            name="trainerAddress"
+            render={({ field }): React.ReactElement => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>
+                  <Trans>Address (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={profileForm.control}
+            name="trainerBio"
+            render={({ field }): React.ReactElement => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>
+                  <Trans>Professional bio (optional)</Trans>
+                </FormLabel>
+                <FormControl>
+                  <Textarea rows={3} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

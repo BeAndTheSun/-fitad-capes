@@ -10,8 +10,7 @@
       "@/api/*": ["./src/*"],
       "@/mailing/*": ["../../packages/mailing/src/*"],
       "@/types/*": ["../../packages/types/src/*"],
-      "@/logger/*": ["../../packages/logger/src/*"],
-      "@/common/*": ["../../packages/common/src/*"]
+      "@/logger/*": ["../../packages/logger/src/*"]
     }
   },
   "include": ["src", "tests", "tests", "jest.config.ts"]

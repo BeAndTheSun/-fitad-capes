@@ -10,5 +10,25 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
 
+  local-s3:
+    image: localstack/localstack:0.14.2
+    volumes:
+      - ./scripts/local-buckets.sh:/docker-entrypoint-initaws.d/local-buckets.sh
+    ports:
+      - '4566:4566'
+      - '4567:4567' # DynamoDB
+    environment:
+      - LOCALSTACK_SERVICES=s3,dynamodb
+      - S3_SKIP_SIGNATURE_VALIDATION=0
+
+  task-runner:
+    build:
+      context: .
+      dockerfile: ./apps/task-runner/Dockerfile
+    volumes:
+      - ./apps/taskrunner:/opt/meltstudio/task-runner
+    ports:
+      - '3010:3010'
+
 volumes:
   dynamodb-data:

@@ -9,8 +9,7 @@
       "@/db/*": ["../../packages/db/src/*"],
       "@/types/*": ["../../packages/types/src/*"],
       "@/logger/*": ["../../packages/logger/src/*"],
-      "@/mailing/*": ["../../packages/mailing/src/*"],
-      "@/common/*": ["../../packages/common/src/*"]
+      "@/mailing/*": ["../../packages/mailing/src/*"]
     }
   },
   "include": ["src", "tests", "jest.config.ts"]

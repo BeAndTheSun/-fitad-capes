@@ -1,7 +1,9 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-console */
 /* eslint-disable max-classes-per-file */
-import type { ActivityStreamData, RowEmbeddingData } from '@meltstudio/types';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { handleWebhookEvent } from '@meltstudio/common/src/handlers/webhook/handler-event';
+import type { ActivityStreamData } from '@meltstudio/types';
 import { ActivityActions } from '@meltstudio/types';
 import type { InferSelectModel, Table } from 'drizzle-orm';
 import {
@@ -30,8 +32,6 @@ import type {
   SelectResult,
 } from 'drizzle-orm/query-builders/select.types';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { handleWebhookEvent } from '@/common/handlers/webhook/handler-event';
 import type { AlgoliaDataConfigCl } from '@/db/algolia/model/base';
 import { algoliaTablesHistory } from '@/db/algolia/model/tables-history';
 import * as schema from '@/db/schema';
@@ -694,14 +694,6 @@ export abstract class DbModel<
       });
     }
 
-    if (this.saveEmbedding) {
-      await this.vectorDbService.embedRowsBatch(
-        this.schemaTsName,
-        [createdRow as unknown as RowEmbeddingData],
-        activityStreamData?.workspaceId ?? null
-      );
-    }
-
     if (this.sendWebhooks) {
       await this.sendWebhookIfNeeded({
         eventType: ActivityActions.CREATE,
@@ -745,14 +737,6 @@ export abstract class DbModel<
       });
     }
 
-    if (this.saveEmbedding) {
-      await this.vectorDbService.embedRowsBatch(
-        this.schemaTsName,
-        [createdRow as unknown as RowEmbeddingData],
-        activityStreamData?.workspaceId ?? null
-      );
-    }
-
     if (this.sendWebhooks) {
       await this.sendWebhookIfNeeded({
         eventType: ActivityActions.CREATE,
@@ -790,14 +774,6 @@ export abstract class DbModel<
             newChanges: record,
           })
         )
-      );
-    }
-
-    if (this.saveEmbedding) {
-      await this.vectorDbService.embedRowsBatch(
-        this.schemaTsName,
-        createdRows as unknown as RowEmbeddingData[],
-        activityStreamData?.workspaceId ?? null
       );
     }
 
@@ -843,14 +819,6 @@ export abstract class DbModel<
             newChanges: record,
           })
         )
-      );
-    }
-
-    if (this.saveEmbedding) {
-      await this.vectorDbService.embedRowsBatch(
-        this.schemaTsName,
-        createdRows as unknown as RowEmbeddingData[],
-        activityStreamData?.workspaceId ?? null
       );
     }
 
@@ -1053,14 +1021,6 @@ export abstract class DbModel<
 
       const updated = await this.updateSingleRow(trx, pk, data);
 
-      if (this.saveEmbedding) {
-        await this.vectorDbService.embedRowsBatch(
-          this.schemaTsName,
-          [updated as unknown as RowEmbeddingData],
-          activityStreamData?.workspaceId ?? null
-        );
-      }
-
       return updated;
     });
 
@@ -1110,18 +1070,6 @@ export abstract class DbModel<
 
       const updated = await this.updateMultipleRows(trx, pk, data);
 
-      if (this.saveEmbedding) {
-        await Promise.all(
-          updated.map((row) =>
-            this.vectorDbService.embedRowsBatch(
-              this.schemaTsName,
-              [row as unknown as RowEmbeddingData],
-              activityStreamData?.workspaceId ?? null
-            )
-          )
-        );
-      }
-
       return updated;
     });
 
@@ -1169,14 +1117,6 @@ export abstract class DbModel<
 
       const updated = await this.updateSingleRow(trx, pk, newData);
 
-      if (this.saveEmbedding) {
-        await this.vectorDbService.embedRowsBatch(
-          this.schemaTsName,
-          [updated as unknown as RowEmbeddingData],
-          activityStreamData?.workspaceId ?? null
-        );
-      }
-
       return updated;
     });
 
@@ -1203,10 +1143,6 @@ export abstract class DbModel<
     await this.client.transaction(async (tx) => {
       await tx.delete(this.dbTable).where(eq(this.dbTablePkColumn, pk));
 
-      if (this.saveEmbedding) {
-        await this.vectorDbService.removeEmbedding(this.schemaTsName, pk);
-      }
-
       if (activityStreamData) {
         await this.logActivityIfNeeded({
           pk,
@@ -1220,10 +1156,6 @@ export abstract class DbModel<
     });
 
     await this.handleAlgoliaRemoveIfPossible(pk);
-
-    if (this.saveEmbedding) {
-      await this.vectorDbService.removeEmbedding(this.schemaTsName, pk);
-    }
 
     if (this.sendWebhooks) {
       await this.sendWebhookIfNeeded({
@@ -1272,14 +1204,6 @@ export abstract class DbModel<
       pks.map((pk) => this.handleAlgoliaRemoveIfPossible(pk))
     );
 
-    if (this.saveEmbedding) {
-      await Promise.allSettled(
-        pks.map((pk) =>
-          this.vectorDbService.removeEmbedding(this.schemaTsName, pk)
-        )
-      );
-    }
-
     if (this.sendWebhooks) {
       await Promise.allSettled(
         pks.map((pk) =>
@@ -1320,10 +1244,6 @@ export abstract class DbModel<
     });
 
     await this.handleAlgoliaRemoveIfPossible(value);
-
-    if (this.saveEmbedding) {
-      await this.vectorDbService.removeEmbedding(this.schemaTsName, value);
-    }
 
     if (this.sendWebhooks) {
       await this.sendWebhookIfNeeded({

@@ -6,8 +6,7 @@
     "outDir": "./dist",
     "paths": {
       "@/ai/*": ["./src/*"],
-      "@/db/*": ["../db/src/*"],
-      "@/common/*": ["../common/src/*"]
+      "@/db/*": ["../db/src/*"]
     }
   },
   "include": ["src", "example.ts", "tests", "jest.config.ts", "scripts"]

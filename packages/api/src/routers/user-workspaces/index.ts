@@ -90,6 +90,12 @@ userWorkspacesRouter.get(
       id: trainerWorkspace.user.id,
       name: trainerWorkspace.user.name,
       email: trainerWorkspace.user.email,
+      trainerName: trainerWorkspace.user.trainerName,
+      trainerPhone: trainerWorkspace.user.trainerPhone,
+      trainerEmail: trainerWorkspace.user.trainerEmail,
+      trainerAddress: trainerWorkspace.user.trainerAddress,
+      trainerSocialUrl: trainerWorkspace.user.trainerSocialUrl,
+      trainerBio: trainerWorkspace.user.trainerBio,
     });
   }
 );

@@ -5,8 +5,7 @@
     "paths": {
       "@/api/*": ["../api/src/*"],
       "@/client-common/*": ["./src/*"],
-      "@/db/*": ["../db/src/*"],
-      "@/common/*": ["../common/src/*"]
+      "@/db/*": ["../db/src/*"]
     }
   },
   "include": ["src", "tests", "jest.config.ts"]

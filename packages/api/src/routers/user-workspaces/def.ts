@@ -13,6 +13,12 @@ const trainerSchema = selectUserSchema.pick({
   id: true,
   name: true,
   email: true,
+  trainerName: true,
+  trainerPhone: true,
+  trainerEmail: true,
+  trainerAddress: true,
+  trainerSocialUrl: true,
+  trainerBio: true,
 });
 
 // Member participation schema: combine user workspace role, workspace info, and user info
