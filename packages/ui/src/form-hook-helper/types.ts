@@ -13,7 +13,8 @@ export type FieldDataType =
   | 'date'
   | 'file'
   | 'array'
-  | 'textarea';
+  | 'textarea'
+  | 'color';
 export type FieldDataSize = 'half' | 'full';
 export type FieldDataOption = {
   value: string;

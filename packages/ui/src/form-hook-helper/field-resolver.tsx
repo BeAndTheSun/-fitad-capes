@@ -43,7 +43,7 @@ export const FieldResolver = <TFieldValues extends FieldValues>({
   if (size === 'half') {
     sizeClassName = cn(sizeClassName, 'md:col-span-6');
   }
-  if (type === 'text' || type === 'password') {
+  if (type === 'text' || type === 'password' || type === 'color') {
     return (
       <TextInputHelper
         key={fieldData.name}

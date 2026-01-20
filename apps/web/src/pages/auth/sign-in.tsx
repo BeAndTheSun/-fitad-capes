@@ -298,23 +298,6 @@ const SignInPage: NextPageWithLayout<ServerSideProps> = (props) => {
             {provider.name}
           </Button>
         ))}
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              <Trans>Or create an account</Trans>
-            </span>
-          </div>
-        </div>
-
-        <Button variant="outline" type="button" asChild>
-          <Link href="/auth/sign-up">
-            <Trans>Create account</Trans>
-          </Link>
-        </Button>
       </div>
     </>
   );

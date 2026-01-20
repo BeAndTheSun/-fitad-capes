@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const env = createEnv({
   server: {
-    OPENAI_API_KEY: z.string(),
+    OPENAI_API_KEY: z.string().optional(),
     OPENAI_DEFAULT_MODEL: z.string().default('gpt-4o-mini'),
   },
   runtimeEnv: process.env,

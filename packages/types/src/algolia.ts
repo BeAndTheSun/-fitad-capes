@@ -4,6 +4,7 @@ export enum AlgoliaIndex {
   USERS = 'users',
   TABLES_HISTORY = 'tables_history',
   REPORTS = 'reports',
+  VENUES = 'venue',
 }
 
 // TODO: Improve this type

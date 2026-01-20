@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 import { ErrorMessageBox } from '@/components/error-message-box';
 import type { ModelConfigData } from '@/config/super-admin';
+import { useFileInput } from '@/hooks/use-file-input';
 import { useModelByRoute } from '@/hooks/use-model-by-route';
 import { useRelationsByModel } from '@/hooks/use-relations-by-model';
 import type { NextPageWithLayout } from '@/types/next';
@@ -56,6 +57,7 @@ const AdminRecordComponent: React.FC<AdminRecordComponentProps> = ({
 }) => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { uploadFile } = useFileInput();
 
   // Setup the update mutation
   const createRecord = useCreateRecord({
@@ -63,17 +65,27 @@ const AdminRecordComponent: React.FC<AdminRecordComponentProps> = ({
   });
 
   const { toast } = useToast();
-
-  const formFieldsWithRelations = useRelationsByModel(model);
-
+  const baseFields = useRelationsByModel(model);
   const { formComponent } = useFormHelper(
     {
       schema: addMinLengthValidationToRequiredStrings(model.schema),
-      fields: formFieldsWithRelations,
+      fields: baseFields,
       isLoading: createRecord.isLoading,
       submitContent: t('Create'),
-      onSubmit: (values) => {
-        const { data, relations } = buildRecordRequest(model, values);
+      onSubmit: async (values) => {
+        const { data, relations, files } = buildRecordRequest(model, values);
+        if (files.length > 0) {
+          const uploaded = await Promise.all(
+            files.map(async (fileInfo) => {
+              const { key: uploadedKey } = await uploadFile(fileInfo.file);
+              return { keyName: fileInfo.key, uploadedKey };
+            })
+          );
+          uploaded.forEach(({ keyName, uploadedKey }) => {
+            data[keyName] = uploadedKey;
+          });
+        }
+
         createRecord.mutate(
           {
             data,

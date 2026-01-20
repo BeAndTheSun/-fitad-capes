@@ -16,7 +16,10 @@ import { DbReportsModel } from './reports';
 import { DbTablesHistoryModel } from './tables-history';
 import { DbUserModel } from './user';
 import { DBUserFeatureFlags } from './user-feature-flags';
+import { DBUserPersonalDataModel } from './user-personal-data';
 import { DbUserWorkspacesModel } from './user-workspaces';
+import { DbVenueModel } from './venue';
+import { DBVenueUserModel } from './venue-users';
 import { DbWebhookEventsModel } from './webhook-events';
 import { DbWebhooksModel } from './webhooks';
 import { DbWorkspaceModel } from './workspace';
@@ -40,6 +43,9 @@ export type DbModelMap = {
   tablesHistory: DbTablesHistoryModel;
   reports: DbReportsModel;
   globalFeatureFlags: DbGlobalFeatureFlagsModel;
+  venue: DbVenueModel;
+  venueUsers: DBVenueUserModel;
+  userPersonalData: DBUserPersonalDataModel;
   // Add other models here
 };
 
@@ -50,6 +56,7 @@ export const DbModelMapValues = {
   userFeatureFlag: true,
   workspace: true,
   userWorkspaces: true,
+  venueUsers: true,
   memberInvitations: true,
   workspaceProfile: true,
   integration: true,
@@ -57,6 +64,8 @@ export const DbModelMapValues = {
   webhooks: true,
   webhookEvents: true,
   globalFeatureFlags: true,
+  venue: true,
+  userPersonalData: true,
 } as const;
 
 export type DbModelKeys = keyof DbModelMap;
@@ -82,12 +91,15 @@ export class Db {
       webhooks: new DbWebhooksModel(this),
       chat: new DbChatModel(this),
       message: new DbMessageModel(this),
+      venueUsers: new DBVenueUserModel(this),
       tablesHistory: new DbTablesHistoryModel(this, algoliaTablesHistory),
       reports: new DbReportsModel(this, algoliaReports),
       globalFeatureFlags: new DbGlobalFeatureFlagsModel(
         this,
         globalFeatureFlagsAlgolia
       ),
+      venue: new DbVenueModel(this),
+      userPersonalData: new DBUserPersonalDataModel(this),
     };
   }
 
@@ -109,6 +121,10 @@ export class Db {
 
   public get workspace(): DbWorkspaceModel {
     return this.models.workspace;
+  }
+
+  public get venueUsers(): DBVenueUserModel {
+    return this.models.venueUsers;
   }
 
   public get userWorkspaces(): DbUserWorkspacesModel {
@@ -157,6 +173,14 @@ export class Db {
 
   public get reports(): DbReportsModel {
     return this.models.reports;
+  }
+
+  public get venue(): DbVenueModel {
+    return this.models.venue;
+  }
+
+  public get userPersonalData(): DBUserPersonalDataModel {
+    return this.models.userPersonalData;
   }
 
   public getModel<K extends keyof DbModelMap>(modelName: K): DbModelMap[K] {

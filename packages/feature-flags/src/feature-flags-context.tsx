@@ -28,9 +28,11 @@ export const FeatureFlagsProvider: FC<
   PropsWithChildren<FeatureFlagsProviderProps>
 > = ({ children, userFeatureFlags, workspaceId }) => {
   // TODO: Try to inject this to remove api dependency
-  const { data: featureFlags, isLoading } = useGetFeatureFlags({
+  const { data: featureFlags, isLoading: isQueryLoading } = useGetFeatureFlags({
     workspaceId,
   });
+
+  const isLoading = workspaceId?.trim() ? isQueryLoading : false;
 
   const sessionFlags = useMemo(() => {
     // Create the map with all incoming feature flags

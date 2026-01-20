@@ -12,5 +12,7 @@ export type * from './reports';
 export type * from './tables-history';
 export type * from './user';
 export type * from './user-feature-flags';
+export type * from './user-personal-data';
 export type * from './user-workspaces';
+export type * from './venue';
 export type * from './workspace';

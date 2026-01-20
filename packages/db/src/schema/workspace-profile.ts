@@ -9,7 +9,7 @@ export const workspaceProfile = pgTable(
       .references(() => workspace.id, { onDelete: 'cascade' })
       .notNull(),
     description: text().notNull(),
-    logoFile: varchar({ length: 256 }).notNull(),
+
     instagramUrl: varchar({ length: 256 }),
     facebookUrl: varchar({ length: 256 }),
     companyUrl: varchar({ length: 256 }),

@@ -10,8 +10,11 @@ import { reportsApiDef } from './reports/def';
 import { sessionApiDef } from './session/def';
 import { storageApiDef } from './storage/def';
 import { taskRunnerApiDef } from './task-runner/def';
+import { userPersonalDataApiDef } from './user-personal-data/def';
 import { userWorkspacesApiDef } from './user-workspaces/def';
 import { usersApiDef } from './users/def';
+import { venueUsersApiDef } from './venue-users/def';
+import { venuesApi } from './venues/def';
 import { webhooksApiDef } from './webhooks/def';
 import { workspaceProfileApiDef } from './workspace-profile/def';
 
@@ -30,6 +33,9 @@ const zodiosApiDef = mergeApis({
   '/historic-table': historicTableApiDef,
   '/user-workspaces': userWorkspacesApiDef,
   '/reports': reportsApiDef,
+  '/venues': venuesApi,
+  '/venue-users': venueUsersApiDef,
+  '/user-personal-data': userPersonalDataApiDef,
 });
 
 export const apiDef = mergeApis({

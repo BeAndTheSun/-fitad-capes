@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 /* eslint-disable max-classes-per-file */
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { handleWebhookEvent } from '@meltstudio/common/src/handlers/webhook/handler-event';
 import type { ActivityStreamData, RowEmbeddingData } from '@meltstudio/types';
 import { ActivityActions } from '@meltstudio/types';
 import type { InferSelectModel, Table } from 'drizzle-orm';

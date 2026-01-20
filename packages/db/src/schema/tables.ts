@@ -7,11 +7,14 @@ import { integrationKey } from './integration-key';
 import { memberInvitations } from './member-invitations';
 import { message } from './messages';
 import { passwordRecoveryTokens } from './password-recovery-tokens';
+import { personalInfo } from './personal-info';
 import { reports } from './reports';
 import { tablesHistory } from './tables-history';
 import { userFeatureFlags } from './user-feature-flags';
 import { userWorkspaces } from './user-workspaces';
 import { users } from './users';
+import { venue } from './venue';
+import { venueUsers } from './venue-users';
 import { webhookEvents } from './webhook-events';
 import { webhooks } from './webhooks';
 import { workspace } from './workspace';
@@ -27,6 +30,7 @@ export const dbSchemas = {
   userFeatureFlags,
   userWorkspaces,
   users,
+  venue,
   workspace,
   workspaceProfile,
   webhooks,
@@ -36,4 +40,6 @@ export const dbSchemas = {
   tablesHistory,
   globalFeatureFlags,
   reports,
+  venueUsers,
+  personalInfo,
 };

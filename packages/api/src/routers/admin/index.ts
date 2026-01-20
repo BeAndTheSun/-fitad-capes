@@ -9,6 +9,31 @@ import { db } from '@/api/db';
 
 import { adminApiDef } from './def';
 
+function parseMaybeJson<T>(value: unknown): T | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return undefined;
+    }
+  }
+  if (typeof value === 'object') return value as T;
+  return undefined;
+}
+
+function parseIsActive(input: unknown): boolean | undefined {
+  if (typeof input === 'string') {
+    if (input === 'true') return true;
+    if (input === 'false') return false;
+    return undefined;
+  }
+  if (typeof input === 'boolean') {
+    return input;
+  }
+  return undefined;
+}
+
 export const adminRouter = ctx.router(adminApiDef);
 
 adminRouter.get('/:model', async (req, res) => {
@@ -23,11 +48,110 @@ adminRouter.get('/:model', async (req, res) => {
   }
 
   const model = db.getModel(modelName);
-  if (model) {
-    const records = await model.findMany();
-    return res.status(200).json(records);
+
+  if (!model) {
+    return res.status(404).json({ error: 'Model not found' });
   }
-  return res.status(404).json({ error: 'Model not found' });
+
+  const rawQuery = (req.query as { query?: unknown }).query;
+  const parsedQuery = parseMaybeJson<{
+    filters?: unknown;
+    pagination?: unknown;
+  }>(rawQuery);
+
+  const rawFilters =
+    parsedQuery?.filters ?? (req.query as { filters?: unknown }).filters;
+  const filters =
+    parseMaybeJson<{ search?: unknown; isActive?: unknown }>(rawFilters) || {};
+
+  const searchFilter =
+    typeof filters.search === 'string' ? filters.search : undefined;
+
+  const rawPagination =
+    parsedQuery?.pagination ??
+    (req.query as { pagination?: unknown }).pagination;
+  const pagination =
+    parseMaybeJson<{ pageIndex?: unknown; pageSize?: unknown }>(
+      rawPagination
+    ) || {};
+
+  const pageIndex = Number(pagination?.pageIndex ?? 0);
+  const pageSize = Number(pagination?.pageSize ?? 10);
+
+  try {
+    let items: unknown[] = [];
+    let total = 0;
+
+    switch (modelName) {
+      case 'users': {
+        const usersResult = await db.user.findAllUsers({
+          filters: {
+            search: searchFilter,
+          },
+          pagination: { pageIndex, pageSize },
+        });
+        items = usersResult.items;
+        total = usersResult.total;
+        break;
+      }
+
+      case 'workspace': {
+        const workspaceResult = await db.workspace.findAllWorkspaces({
+          filters: {
+            search: searchFilter,
+          },
+          pagination: { pageIndex, pageSize },
+        });
+        items = workspaceResult.items;
+        total = workspaceResult.total;
+        break;
+      }
+
+      case 'userWorkspaces': {
+        const userWorkspacesResult =
+          await db.userWorkspaces.findAllUserWorkspaces({
+            filters: {
+              search: searchFilter,
+            },
+            pagination: { pageIndex, pageSize },
+          });
+        items = userWorkspacesResult.items;
+        total = userWorkspacesResult.total;
+        break;
+      }
+      case 'venue': {
+        const isActiveFilter = parseIsActive(filters.isActive);
+        const venueResult = await db.venue.findAllVenues({
+          filters: {
+            search: searchFilter,
+            isActive: isActiveFilter,
+          },
+          pagination: { pageIndex, pageSize },
+        });
+        items = venueResult.items;
+        total = venueResult.total;
+        break;
+      }
+
+      default:
+        return res.status(400).json({ error: 'Unsupported model' });
+    }
+
+    const pageCount = pageSize === 0 ? 1 : Math.ceil(total / pageSize);
+    const limit = pageSize === 0 ? total : pageSize;
+    const offset = pageSize === 0 ? 0 : pageIndex * pageSize;
+
+    return res.status(200).json({
+      items,
+      total,
+      limit,
+      offset,
+      pageCount,
+      currentPage: pageIndex,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 adminRouter.get('/:model/:id', async (req, res) => {

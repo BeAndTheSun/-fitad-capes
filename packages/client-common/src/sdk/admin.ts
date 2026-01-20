@@ -11,19 +11,62 @@ import { apiClient, apiHooks } from './zodios';
 export function useGetRecords<T extends AnyModelType>({
   model,
   enabled,
+  pagination,
+  filters,
 }: {
   model: string;
   enabled?: boolean;
-}): UseQueryResult<T[] | undefined, Error> {
+  pagination?: {
+    pageIndex?: number;
+    pageSize?: number;
+  };
+  filters?: {
+    search?: string;
+    role?: string;
+    isSuperAdmin?: boolean;
+    isActive?: boolean;
+  };
+}): UseQueryResult<
+  | {
+      items: T[];
+      total: number;
+      limit: number;
+      offset: number;
+      pageCount: number;
+      currentPage: number;
+    }
+  | undefined,
+  Error
+> {
   const schema = getModelSchema(model);
   return useQuery(
-    ['getRecords', model],
+    ['getRecords', model, pagination, filters],
     async () => {
       if (model) {
         // Fetch data from API
-        const response = await apiClient.getRecords({ params: { model } });
+        const response = await apiClient.getRecords({
+          params: {
+            model,
+          },
+          queries: {
+            query: {
+              pagination,
+              filters,
+            },
+          },
+        });
+
         // Validate the response using the selected schema
-        const result = z.array(schema).safeParse(response);
+        const result = z
+          .object({
+            items: z.array(schema),
+            total: z.number(),
+            limit: z.number(),
+            offset: z.number(),
+            pageCount: z.number(),
+            currentPage: z.number(),
+          })
+          .safeParse(response);
 
         if (result.success) {
           return result.data;
@@ -34,10 +77,80 @@ export function useGetRecords<T extends AnyModelType>({
         }
         throw new Error('Invalid records format');
       }
-      return [];
+      return {
+        items: [],
+        total: 0,
+        limit: 0,
+        offset: 0,
+        pageCount: 0,
+        currentPage: 0,
+      };
     },
     {
       enabled,
+    }
+  );
+}
+
+export function useGetPaginatedRecords<T extends AnyModelType>({
+  model,
+  enabled,
+  pagination,
+}: {
+  model: string;
+  enabled?: boolean;
+  pagination?: {
+    pageIndex?: number;
+    pageSize?: number;
+  };
+}): UseQueryResult<
+  | {
+      items: T[];
+      total: number;
+      limit: number;
+      offset: number;
+      pageCount: number;
+      currentPage: number;
+    }
+  | undefined,
+  Error
+> {
+  const schema = getModelSchema(model);
+  return useQuery(
+    ['getPaginatedRecords', model, pagination],
+    async () => {
+      if (model) {
+        // Fetch data from API
+        const response = await apiClient.getRecords({
+          params: { model },
+          queries: { query: { pagination } },
+        });
+        // Validate the response using the selected schema
+        const result = z
+          .object({
+            items: z.array(schema),
+            total: z.number(),
+            limit: z.number(),
+            offset: z.number(),
+            pageCount: z.number(),
+            currentPage: z.number(),
+          })
+          .safeParse(response);
+
+        if (result.success) {
+          return result.data;
+        }
+        if (result.error instanceof z.ZodError) {
+          // eslint-disable-next-line no-console
+          console.error(result.error.errors);
+        }
+        throw new Error('Invalid records format');
+      }
+      return undefined;
+    },
+    {
+      enabled,
+      keepPreviousData: true,
     }
   );
 }
@@ -53,7 +166,6 @@ export function useGetRecord(
       const response = await apiClient.getRecord({ params: { model, id } });
       // Validate the response using the selected schema
       const result = schema.safeParse(response);
-
       if (result.success) {
         return result.data;
       }

@@ -77,8 +77,8 @@ const SettingsPage = () => {
           type: 'select',
           label: 'Role',
           options: [
-            { value: UserRole.ADMIN, label: 'Admin' },
-            { value: UserRole.MEMBER, label: 'Member' },
+            { value: UserRole.ADMIN, label: 'Trainer' },
+            { value: UserRole.MEMBER, label: 'Super Participant' },
           ],
           size: 'full',
         },
@@ -255,13 +255,13 @@ Currently supported field types (FieldDataType in `packages/ui/src/form-hook-hel
   - Preferred zod schema is a `z.nativeEnum` or `z.enum`. The
     value of the enum should match the value of the options paramter of
     the FieldData, so if you pass options like
-    `[ { value: UserRole.ADMIN, label: 'Admin' }, { value: UserRole.MEMBER, label: 'Member' }, ]`,
+    `[ { value: UserRole.ADMIN, label: 'Trainer' }, { value: UserRole.MEMBER, label: 'Super Participant' }, ]`,
     you should pass the schema `z.nativeEnum(UserRole)`
 - `multiselect`: Will render a list of checkboxes.
   - Preferred zod schema is a `z.array(z.nativeEnum)` or `z.array(z.enum)`. The
     inner value of the array should match the value of the options paramter of
     the FieldData, so if you pass options like
-    `[ { value: UserRole.ADMIN, label: 'Admin' }, { value: UserRole.MEMBER, label: 'Member' }, ]`,
+    `[ { value: UserRole.ADMIN, label: 'Trainer' }, { value: UserRole.MEMBER, label: 'Super Participant' }, ]`,
     you should pass the schema `z.array(z.nativeEnum(UserRole))`
 - `checkbox`: Will render a list of checkboxes.
   - Same preferred zod schema as `multiselect`

@@ -9,7 +9,7 @@ export async function createNewUser(
   args: CreateUserParams,
   withWorkspace = true
 ): Promise<DbUser> {
-  const { email, name, password, workspaceId } = args;
+  const { email, name, password, workspaceId, role } = args;
 
   const hashedPassword = await hashPassword(password);
 
@@ -23,11 +23,12 @@ export async function createNewUser(
     },
   });
 
-  if (withWorkspace) {
+  if (withWorkspace && workspaceId) {
     await db.userWorkspaces.create({
       data: {
         userId: user.id,
         workspaceId,
+        ...(role && { role }),
       },
     });
   }

@@ -1,3 +1,4 @@
+import type { AnyModelKey } from '@meltstudio/zod-schemas';
 import { z } from 'zod';
 
 import type { ModelConfigData } from '@/config/super-admin';
@@ -5,6 +6,7 @@ import type { ModelConfigData } from '@/config/super-admin';
 export type ModelUpdate = {
   data: Record<string, unknown>;
   relations: { relationModel: string; relatedIds: string[] }[];
+  files: { key: AnyModelKey; file: File }[];
 };
 
 const stringArraySchema = z.array(z.string());
@@ -13,7 +15,7 @@ export function buildRecordRequest(
   model: ModelConfigData,
   values: Record<string, unknown>
 ): ModelUpdate {
-  const { data, relations } = model.fields.reduce<ModelUpdate>(
+  const { data, relations, files } = model.fields.reduce<ModelUpdate>(
     (acc, field) => {
       if (field.type === 'manyRelation' && field.relationModel) {
         // move fields with 'manyRelation' to the relations object
@@ -32,15 +34,26 @@ export function buildRecordRequest(
             'Field of type "manyRelation" doesn\'t have a string array value'
           );
         }
+      } else if (field.type === 'file') {
+        const fieldValue = values[field.key];
+        if (fieldValue instanceof File) {
+          acc.files.push({
+            key: field.key,
+            file: fieldValue,
+          });
+        } else {
+          acc.data[field.key] = fieldValue;
+        }
       } else {
         acc.data[field.key] = values[field.key];
       }
       return acc;
     },
-    { data: {}, relations: [] }
+    { data: {}, relations: [], files: [] }
   );
   return {
     data,
     relations,
+    files,
   };
 }

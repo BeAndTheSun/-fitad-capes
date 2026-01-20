@@ -160,3 +160,9 @@ export function useMemberAcceptInvitation(
 ): ReturnType<typeof apiHooks.useMemberAcceptInvitation> {
   return apiHooks.useMemberAcceptInvitation(...params);
 }
+
+export function useCreateMember(
+  ...params: Parameters<typeof apiHooks.useCreateMember>
+): ReturnType<typeof apiHooks.useCreateMember> {
+  return apiHooks.useCreateMember(...params);
+}

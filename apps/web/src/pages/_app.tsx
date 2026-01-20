@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 
 import { GoogleTagManagerComponent } from '@/components/google-tag-manager';
 import { UserProvider, useSessionUser } from '@/components/user/user-context';
+import { ViewAsMemberProvider } from '@/components/view-as-member/view-as-member-context';
 import { FeatureFlagsProvider } from '@/feature-flags/index';
 import { DashboardLayout } from '@/layouts/dashboard';
 import nextI18NextConfig from '@/next-i18next.config';
@@ -76,7 +77,9 @@ const App = (props: AppPropsWithLayout): JSX.Element => {
 
       <QueryClientProvider client={queryClient}>
         <UserProvider>
-          <AppWithFeatureFlags {...props} />
+          <ViewAsMemberProvider>
+            <AppWithFeatureFlags {...props} />
+          </ViewAsMemberProvider>
         </UserProvider>
         <Toaster />
       </QueryClientProvider>

@@ -117,10 +117,10 @@ describe('IntegrationSetupForm', () => {
 
     // Fill in the form
     await userEvent.click(await screen.findByLabelText(/enabled/i));
-    await userEvent.type(
-      await screen.findByLabelText(/api key/i),
-      'test-api-key'
-    );
+
+    const apiKeyInput = await screen.findByLabelText(/api key/i);
+    await userEvent.clear(apiKeyInput);
+    await userEvent.type(apiKeyInput, 'test-api-key');
     await userEvent.type(
       await screen.findByLabelText(/secret key/i),
       'test-secret-key'

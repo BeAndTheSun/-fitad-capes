@@ -1,27 +1,45 @@
-import { IntegrationHooks } from '@meltstudio/common';
-import { ActivityActions, UserRoleEnum } from '@meltstudio/types';
+import { ActivityActions } from '@meltstudio/types';
 
 import { ctx } from '@/api/context';
 import { db } from '@/api/db';
-import { inviteMultipleMembersToWorkspace } from '@/api/services/user';
 
 import { workspaceProfileApiDef } from './def';
+import {
+  ensureCreatorInWorkspace,
+  processMembers,
+  triggerIntegrationHooks,
+} from './utils';
 
 export const workspaceProfileRouter = ctx.router(workspaceProfileApiDef);
 
 workspaceProfileRouter.post('/', async (req, res) => {
-  if (req.auth == null) {
+  const { auth } = req;
+  if (auth == null) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
-  // Check sender
-  const user = await db.user.findUniqueByEmail(req.auth.user.email);
+  const user = await db.user.findUniqueByEmail(auth.user.email);
 
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
 
-  const { workspaceId, members } = req.body;
+  const {
+    workspaceId,
+    description,
+    instagramUrl,
+    facebookUrl,
+    companyUrl,
+    linkedinUrl,
+    members,
+    includeCreatorInWorkspace,
+  } = req.body;
+
+  if (members.length === 0) {
+    return res.status(400).json({
+      error: 'No members added to the workspace',
+    });
+  }
 
   const existingWorkspace = await db.workspace.findUniqueByPk(workspaceId);
   const existingProfile =
@@ -38,49 +56,40 @@ workspaceProfileRouter.post('/', async (req, res) => {
       error: 'Profile already exists for this workspaceId',
     });
   }
-
-  // this can be handled by zod, but was added here to showcase the workspace creation wizard getting an error on submission
-  if (req.body.members.length === 0) {
-    return res.status(400).json({
-      error: 'No members added to the workspace',
-    });
-  }
-
   const newProfile = await db.workspaceProfile.create({
-    data: req.body,
+    data: {
+      workspaceId,
+      description,
+      instagramUrl,
+      facebookUrl,
+      companyUrl,
+      linkedinUrl,
+    },
     activityStreamData: {
-      userId: req.auth.user.id,
+      userId: auth.user.id,
       workspaceId,
     },
   });
 
-  if (req.body.includeCreatorInWorkspace) {
-    await db.userWorkspaces.create({
-      data: {
-        userId: user.id,
-        workspaceId,
-        role: UserRoleEnum.ADMIN,
-      },
-      activityStreamData: {
-        userId: req.auth.user.id,
-        workspaceId,
-      },
-    });
-  }
-
-  await inviteMultipleMembersToWorkspace({
+  await processMembers({
     workspaceId,
-    senderName: user.name,
     members,
+    senderName: user.name,
+    senderId: auth.user.id,
   });
 
-  const eventType = ActivityActions.CREATE;
+  await ensureCreatorInWorkspace({
+    workspaceId,
+    creatorId: user.id,
+    senderId: auth.user.id,
+    includeCreator: includeCreatorInWorkspace,
+  });
 
-  await Promise.all(
-    members.map((member) =>
-      IntegrationHooks.onAddUser(member, workspaceId, eventType)
-    )
-  );
+  await triggerIntegrationHooks({
+    workspaceId,
+    members,
+    eventType: ActivityActions.CREATE,
+  });
 
   return res.status(201).json(newProfile);
 });

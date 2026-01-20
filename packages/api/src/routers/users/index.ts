@@ -6,11 +6,32 @@ import { isAfter } from 'date-fns';
 import { ctx } from '@/api/context';
 import { db } from '@/api/db';
 import { inviteMemberToWorkspace } from '@/api/services/user';
+import { createMemberInWorkspace } from '@/api/services/user/create-member-in-workspace';
 import { createNewUser } from '@/api/utils/session';
 
 import { usersApiDef } from './def';
 
 export const usersRouter = ctx.router(usersApiDef);
+
+usersRouter.post('/:workspaceId/create-member', async (req, res) => {
+  if (req.auth == null) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  const { workspaceId } = req.params;
+  const { name, email, password } = req.body;
+
+  try {
+    const result = await createMemberInWorkspace(workspaceId, {
+      name,
+      email,
+      password,
+    });
+    return res.status(201).json(result);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to create member' });
+  }
+});
 
 usersRouter.get('/me', async (req, res) => {
   if (req.auth == null) {
@@ -20,7 +41,8 @@ usersRouter.get('/me', async (req, res) => {
   const user = await db.user.findUniqueByEmailWithPassword(req.auth.user.email);
 
   if (user) {
-    return res.status(200).json(user);
+    const isVenueOwner = await db.venue.isOwner(user.id);
+    return res.status(200).json({ ...user, isVenueOwner });
   }
   return res.status(404).json({ error: 'User not found' });
 });

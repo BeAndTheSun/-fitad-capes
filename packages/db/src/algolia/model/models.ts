@@ -5,6 +5,7 @@ import { globalFeatureFlagsAlgolia } from './global-feature-flags';
 import { algoliaReports } from './reports';
 import { algoliaTablesHistory } from './tables-history';
 import { user } from './user';
+import { venues } from './venue';
 import { workspaces } from './workspace';
 
 export const models: Record<AlgoliaIndex, AlgoliaDataConfigCl> = {
@@ -13,4 +14,5 @@ export const models: Record<AlgoliaIndex, AlgoliaDataConfigCl> = {
   [AlgoliaIndex.WORKSPACES]: workspaces,
   [AlgoliaIndex.TABLES_HISTORY]: algoliaTablesHistory,
   [AlgoliaIndex.REPORTS]: algoliaReports,
+  [AlgoliaIndex.VENUES]: venues,
 };

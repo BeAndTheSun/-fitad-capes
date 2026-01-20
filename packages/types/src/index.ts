@@ -1,5 +1,6 @@
 export * from './activity-stream';
 export * from './algolia';
+export * from './api-error';
 export * from './auth';
 export * from './db';
 export * from './feature-flags';

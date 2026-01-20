@@ -57,6 +57,69 @@
       "when": 1758837429033,
       "tag": "0007_add_model_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1766092646777,
+      "tag": "0008_add_venue_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1767716360621,
+      "tag": "0009_remove_logo_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1767819931542,
+      "tag": "0010_add_owner_id_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1767886104794,
+      "tag": "0011_add_venue-users_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1768407220706,
+      "tag": "0012_add_venue_invitation_token",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1768510188829,
+      "tag": "0013_add_venue_status_and_event_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1768565154481,
+      "tag": "0014_add_personal_info_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1768577191486,
+      "tag": "0015_add_fields_to_venue",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1768660000000,
+      "tag": "0016_add_status_to_venue_users",
+      "breakpoints": true
     }
   ]
 }

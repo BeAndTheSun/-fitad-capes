@@ -1,6 +1,6 @@
 'use client';
 
-import { useSearchParams } from '@meltstudio/core';
+import { parseSearchParams, useSearchParams } from '@meltstudio/core';
 import { Button } from '@meltstudio/theme';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import type { Table } from '@tanstack/react-table';
@@ -33,14 +33,20 @@ export const DataTableToolbar = <TData,>(
 
   // TODO: find a way to use hooks both from next/navigation and next/router
   const router = useRouter();
-  const { pathname } = router;
+  const pathname = router.asPath.split('?')[0];
   const searchParams = useSearchParams();
 
   const hasFilters =
     globalFiltersDefs.length > 0 || columnFiltersDefs.length > 0;
   // TODO: this will probably need improvements if the page has search params
   // not related to the table
-  const isFiltered = searchParams != null && searchParams.toString() !== '';
+  const isFiltered = ((): boolean => {
+    if (searchParams == null) return false;
+    const paramsObj = parseSearchParams(searchParams);
+    delete paramsObj.pagination;
+    delete paramsObj.sorting;
+    return Object.keys(paramsObj).length > 0;
+  })();
 
   const handleResetClick: MouseEventHandler<HTMLButtonElement> = async () => {
     if (pathname == null) {

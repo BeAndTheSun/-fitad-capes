@@ -20,7 +20,9 @@ export const usersApiDef = makeApi([
     description: 'Get own user',
     method: 'get',
     path: '/me',
-    response: z.object(selectUserSchemaWithPasswordExtendedSchema.shape),
+    response: z
+      .object(selectUserSchemaWithPasswordExtendedSchema.shape)
+      .extend({ isVenueOwner: z.boolean() }),
     errors: [
       {
         status: 401,
@@ -160,6 +162,47 @@ export const usersApiDef = makeApi([
       {
         status: 404,
         description: 'User or workspace not found',
+        schema: apiCommonErrorSchema,
+      },
+    ],
+  },
+  {
+    alias: 'createMember',
+    description: 'Create a member',
+    method: 'post',
+    path: '/:workspaceId/create-member',
+    parameters: [
+      {
+        type: 'Body',
+        description: 'Member data',
+        name: 'body',
+        schema: z.object({
+          name: z.string(),
+          email: z.string().email(),
+          password: z.string(),
+        }),
+      },
+      {
+        type: 'Path',
+        description: 'Workspace ID',
+        name: 'workspaceId',
+        schema: z.string(),
+      },
+    ],
+    response: z.object({
+      user: selectUserSchema,
+      isNew: z.boolean(),
+      addedToWorkspace: z.boolean(),
+    }),
+    errors: [
+      {
+        status: 401,
+        description: 'Invalid auth',
+        schema: apiCommonErrorSchema,
+      },
+      {
+        status: 500,
+        description: 'Internal Server Error',
         schema: apiCommonErrorSchema,
       },
     ],

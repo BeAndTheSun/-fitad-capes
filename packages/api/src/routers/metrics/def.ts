@@ -2,6 +2,7 @@ import { makeApi } from '@zodios/core';
 import { z } from 'zod';
 
 import { apiCommonErrorSchema } from '@/api/routers/def-utils';
+import { metricSchema } from '@/api/schemas/metrics';
 
 export const metricsApiDef = makeApi([
   {
@@ -17,14 +18,15 @@ export const metricsApiDef = makeApi([
         name: 'body',
         schema: z.object({
           workspaceId: z.string(),
-          metric: z.enum(['USERS_OVER_TIME', 'WORKSPACES_OVER_TIME']),
+          sessionUserId: z.string().optional(),
+          metric: metricSchema,
         }),
       },
     ],
     status: 200,
     response: z.array(
       z.object({
-        date: z.string(),
+        label: z.string(),
         count: z.number(),
       })
     ),

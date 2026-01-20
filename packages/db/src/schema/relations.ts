@@ -8,11 +8,14 @@ import { integrationKey } from './integration-key';
 import { memberInvitations } from './member-invitations';
 import { message } from './messages';
 import { passwordRecoveryTokens } from './password-recovery-tokens';
+import { personalInfo } from './personal-info';
 import { reports } from './reports';
 import { tablesHistory } from './tables-history';
 import { userFeatureFlags } from './user-feature-flags';
 import { userWorkspaces } from './user-workspaces';
 import { users } from './users';
+import { venue } from './venue';
+import { venueUsers } from './venue-users';
 import { webhookEvents } from './webhook-events';
 import { webhooks } from './webhooks';
 import { workspace } from './workspace';
@@ -36,9 +39,14 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     fields: [users.id],
     references: [memberInvitations.userId],
   }),
-  chats: many(chat),
+  chat: many(chat),
   messages: many(message),
   history: many(tablesHistory),
+  venueUsers: many(venueUsers),
+  personalInfo: one(personalInfo, {
+    fields: [users.id],
+    references: [personalInfo.userId],
+  }),
 }));
 
 export const integrationsRelations = relations(integration, ({ many }) => ({
@@ -180,5 +188,31 @@ export const reportsRelations = relations(reports, ({ one }) => ({
   workspace: one(workspace, {
     fields: [reports.workspaceId],
     references: [workspace.id],
+  }),
+}));
+
+export const venueRelations = relations(venue, ({ one, many }) => ({
+  owner: one(users, {
+    fields: [venue.ownerId],
+    references: [users.id],
+  }),
+  users: many(venueUsers),
+}));
+
+export const venueUsersRelations = relations(venueUsers, ({ one }) => ({
+  user: one(users, {
+    fields: [venueUsers.userId],
+    references: [users.id],
+  }),
+  venue: one(venue, {
+    fields: [venueUsers.venueId],
+    references: [venue.id],
+  }),
+}));
+
+export const personalInfoRelations = relations(personalInfo, ({ one }) => ({
+  user: one(users, {
+    fields: [personalInfo.userId],
+    references: [users.id],
   }),
 }));

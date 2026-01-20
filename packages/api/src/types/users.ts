@@ -36,8 +36,8 @@ export const CreateUserParamsSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   password: z.string(),
-  role: z.nativeEnum(UserRoleEnum).default(UserRoleEnum.MEMBER),
-  workspaceId: z.string(),
+  role: z.nativeEnum(UserRoleEnum).optional(),
+  workspaceId: z.string().optional(),
 });
 
 export type CreateUserParams = z.infer<typeof CreateUserParamsSchema>;

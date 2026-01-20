@@ -72,5 +72,8 @@
   "packageManager": "yarn@1.22.17",
   "resolutions": {
     "react": "^18.3.1"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.38.3"
   }
 }

@@ -1,21 +1,14 @@
 import type { AnyModelKey } from '@meltstudio/zod-schemas';
 import {
-  selectGlobalFeatureFlagsSchema,
-  selectUserWorkspacesSchema,
   userAdminModelSchema,
+  venueAdminModelSchema,
   workspaceAdminModelSchema,
 } from '@meltstudio/zod-schemas';
-import {
-  ChatBubbleIcon,
-  ClipboardIcon,
-  GlobeIcon,
-  MagicWandIcon,
-  StackIcon,
-} from '@radix-ui/react-icons';
+import { MagicWandIcon, StackIcon } from '@radix-ui/react-icons';
 import { Trans, useTranslation } from 'next-i18next';
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { AlgoliaIndex } from '@/common-types/algolia';
 import type {
@@ -39,6 +32,7 @@ export type ModelConfigField = {
   size?: FieldDataSize;
   options?: FieldDataOption[];
   relationModel?: string; // TODO: Add relation model type;
+  required?: boolean;
 };
 
 export type ModelConfigData = {
@@ -85,48 +79,22 @@ export const modelsConfig: ModelConfig = {
         type: 'boolean',
         key: 'isSuperAdmin',
       },
+
       { label: <Trans>Password</Trans>, type: 'password', key: 'password' },
-      {
-        label: <Trans>Workspaces</Trans>,
-        type: 'manyRelation',
-        key: 'workspaces',
-        relationModel: 'workspace',
-      },
     ],
-    schema: userAdminModelSchema.pick({
-      name: true,
-      email: true,
-      active: true,
-      password: true,
-      isSuperAdmin: true,
-      workspaces: true,
-    }),
+    schema: userAdminModelSchema
+      .pick({
+        name: true,
+        email: true,
+        active: true,
+        password: true,
+      })
+      .extend({
+        isSuperAdmin: z.boolean(),
+        role: z.string().optional(),
+      }),
     sidebar: true,
     isExportable: true,
-  },
-  globalFeatureFlags: {
-    name: 'globalFeatureFlags',
-    displayName: <Trans>Global Feature Flags</Trans>,
-    indexName: AlgoliaIndex.GLOBAL_FEATURE_FLAGS,
-    fields: [
-      { label: 'ID', type: 'ID', key: 'id' },
-      { label: <Trans>Flag</Trans>, type: 'text', key: 'flag' },
-      { label: <Trans>Description</Trans>, type: 'text', key: 'description' },
-      { label: <Trans>Released</Trans>, type: 'boolean', key: 'released' },
-      {
-        label: <Trans>Allow Workspace Control</Trans>,
-        type: 'boolean',
-        key: 'allowWorkspaceControl',
-      },
-    ],
-    url: 'globalFeatureFlags',
-    sidebar: true,
-    schema: selectGlobalFeatureFlagsSchema.pick({
-      description: true,
-      released: true,
-      allowWorkspaceControl: true,
-    }),
-    isExportable: false,
   },
   workspace: {
     name: 'workspace',
@@ -150,30 +118,90 @@ export const modelsConfig: ModelConfig = {
     }),
     isExportable: true,
   },
-  userWorkspaces: {
-    name: 'userWorkspaces',
-    displayName: <Trans>Users Workspaces</Trans>,
-    url: 'user-workspaces',
+
+  venue: {
+    name: 'venue',
+    displayName: <Trans>Venues</Trans>,
+    indexName: AlgoliaIndex.VENUES,
+    url: 'venue',
+    sidebar: true,
     fields: [
+      { label: 'ID', type: 'ID', key: 'id' },
+      { label: <Trans>Name</Trans>, type: 'text', key: 'name' },
       {
-        label: <Trans>User ID</Trans>,
-        key: 'userId',
+        label: <Trans>Description</Trans>,
+        type: 'textarea',
+        key: 'description',
+      },
+      { label: <Trans>City</Trans>, type: 'text', key: 'city' },
+      { label: <Trans>Country</Trans>, type: 'text', key: 'country' },
+      { label: <Trans>Address</Trans>, type: 'text', key: 'address' },
+      { label: <Trans>Brand Color</Trans>, type: 'color', key: 'brand_color' },
+      { label: <Trans>Logo</Trans>, type: 'file', key: 'logo_file' },
+      {
+        label: <Trans>Active</Trans>,
+        type: 'boolean',
+        key: 'isActive',
+      },
+      {
+        label: <Trans>Owner</Trans>,
         type: 'relation',
+        key: 'ownerId',
         relationModel: 'users',
       },
       {
-        label: <Trans>Workspace ID</Trans>,
-        key: 'workspaceId',
-        type: 'relation',
-        relationModel: 'workspace',
+        label: 'Phone number',
+        type: 'text',
+        key: 'phone_number',
+        required: false,
+      },
+      {
+        label: 'Company website',
+        type: 'text',
+        key: 'company_website',
+        required: false,
+      },
+      {
+        label: 'Superfit menu link',
+        type: 'text',
+        key: 'superfit_menu_link',
+        required: false,
+      },
+      {
+        label: 'Social media page',
+        type: 'text',
+        key: 'social_media_page',
+        required: false,
       },
     ],
-    sidebar: false,
-    schema: selectUserWorkspacesSchema.pick({
-      userId: true,
-      workspaceId: true,
-    }),
-    isExportable: false,
+    schema: venueAdminModelSchema
+      .pick({
+        name: true,
+        description: true,
+        city: true,
+        country: true,
+        address: true,
+        brand_color: true,
+        ownerId: true,
+        isActive: true,
+      })
+      .merge(
+        venueAdminModelSchema
+          .pick({
+            phone_number: true,
+            company_website: true,
+            superfit_menu_link: true,
+            social_media_page: true,
+          })
+          .partial()
+      )
+      .extend({
+        logo_file: z
+          .union([z.instanceof(File), z.string()])
+          .nullable()
+          .optional(),
+      }),
+    isExportable: true,
   },
   // TODO: use algolia in some models
   // tablesHistory: {
@@ -227,36 +255,7 @@ export const useNavAdmin = (): {
 
   return [{ title: t('Super Admin'), href: '/super-admin/wizard' }];
 };
-const GoogleTagManagerNav = [
-  {
-    title: 'Google tag manager',
-    href: '/super-admin/google-tag-manager',
-    icon: GlobeIcon,
-  },
-];
-
-const ChatBot = [
-  {
-    title: 'Chat Bot',
-    href: '/super-admin/chat-bot',
-    icon: ChatBubbleIcon,
-  },
-];
-
-const taskRunnerNav = [
-  {
-    title: 'Task Runner',
-    href: '/super-admin/async-tasks',
-    icon: ClipboardIcon,
-  },
-];
 
 export const navAdmin = [{ title: 'Admin', href: '/super-admin/wizard' }];
 
-export const sidebarNavAdmin = [
-  ...wizardsNav,
-  ...adminNav,
-  ...GoogleTagManagerNav,
-  ...ChatBot,
-  ...taskRunnerNav,
-];
+export const sidebarNavAdmin = [...wizardsNav, ...adminNav];

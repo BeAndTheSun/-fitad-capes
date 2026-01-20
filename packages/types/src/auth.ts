@@ -45,10 +45,32 @@ enum UserRoleEnum {
   ADMIN = 'admin',
   MEMBER = 'member',
   SUPER_ADMIN = 'super_admin',
+  VENUE_OWNER = 'venue_owner',
 }
+
+export const USER_ROLE_LABELS: Record<UserRoleEnum, string> = {
+  [UserRoleEnum.ADMIN]: 'Trainer',
+  [UserRoleEnum.MEMBER]: 'Super Participant',
+  [UserRoleEnum.SUPER_ADMIN]: 'Super Admin',
+  [UserRoleEnum.VENUE_OWNER]: 'Venue Owner',
+};
 
 export const userRoleList = Object.values(UserRoleEnum).filter(
   (r) => r !== UserRoleEnum.SUPER_ADMIN
 );
 
 export { UserRoleEnum };
+
+enum VenueRoleEnum {
+  OWNER = 'venue_owner',
+  MEMBER = 'member',
+}
+
+export const VENUE_ROLE_LABELS: Record<VenueRoleEnum, string> = {
+  [VenueRoleEnum.OWNER]: 'Venue Owner',
+  [VenueRoleEnum.MEMBER]: 'Super Participant',
+};
+
+export const venueRoleList = Object.values(VenueRoleEnum);
+
+export { VenueRoleEnum };

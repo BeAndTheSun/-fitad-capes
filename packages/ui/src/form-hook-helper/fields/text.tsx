@@ -39,6 +39,11 @@ export const TextInputHelper = <TFieldValues extends FieldValues>({
               type={fieldData.type}
               {...field}
               placeholder={fieldData.placeholder}
+              className={cn(
+                fieldData.type === 'color'
+                  ? 'h-10 max-w-[12rem] p-1'
+                  : undefined
+              )}
             />
           </FormControl>
           <FormMessage />

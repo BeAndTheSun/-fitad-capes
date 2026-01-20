@@ -27,13 +27,43 @@ export const adminApiDef = makeApi([
     method: 'get',
     path: '/:model',
     parameters: [
+      { name: 'model', type: 'Path', schema: z.string() },
       {
-        name: 'model',
-        type: 'Path',
-        schema: z.string(),
+        type: 'Query',
+        description: '',
+        name: 'query',
+        schema: z
+          .object({
+            pagination: z
+              .object({
+                pageIndex: z
+                  .union([z.string(), z.number().nonnegative()])
+                  .optional(),
+                pageSize: z
+                  .union([z.string(), z.number().nonnegative()])
+                  .optional(),
+              })
+              .optional(),
+            filters: z
+              .object({
+                search: z.string().optional(),
+                role: z.string().optional(),
+                isSuperAdmin: z.coerce.boolean().optional(),
+                isActive: z.coerce.boolean().optional(),
+              })
+              .optional(),
+          })
+          .nullish(),
       },
     ],
-    response: z.unknown(),
+    response: z.object({
+      items: z.array(z.unknown()),
+      total: z.number(),
+      limit: z.number(),
+      offset: z.number(),
+      pageCount: z.number(),
+      currentPage: z.number(),
+    }),
     errors: [
       {
         status: 400,

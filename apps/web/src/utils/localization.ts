@@ -11,9 +11,9 @@ import { FeatureFlag } from '@/feature-flags/index';
 export function getUserRoleName(t: TFunction, role: UserRoleEnum): string {
   switch (role) {
     case UserRoleEnum.ADMIN:
-      return t('Admin');
+      return t('Trainer');
     case UserRoleEnum.MEMBER:
-      return t('Member');
+      return t('Super Participant');
     case UserRoleEnum.SUPER_ADMIN:
       return t('Super Admin');
     default:

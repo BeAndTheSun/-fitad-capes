@@ -66,7 +66,7 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
           <CaretSortIcon className="ml-2 size-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder={inputPlaceholder} className="h-9" />
           <CommandEmpty>{emptyMessage}</CommandEmpty>

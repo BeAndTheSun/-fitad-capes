@@ -134,7 +134,7 @@ export function useDataTable<TData>(
 
   // TODO: find a way to use hooks both from next/navigation and next/router
   const router = useRouter();
-  const { pathname } = router;
+  const pathname = router.asPath.split('?')[0];
   const searchParams = useSearchParams();
 
   const updateSearchParams = async (

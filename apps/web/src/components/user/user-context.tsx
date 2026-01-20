@@ -8,7 +8,7 @@ import { useSession } from 'next-auth/react';
 import type { FC, PropsWithChildren } from 'react';
 import { createContext, useCallback, useContext, useMemo } from 'react';
 
-type UserWorkspace = {
+export type UserWorkspace = {
   id: string;
   name: string;
   role: string;
@@ -29,6 +29,7 @@ export type UserContextType = {
   selectedWorkspace: UserWorkspace | null;
   workspaces: UserWorkspace[];
   isSuperAdmin: boolean;
+  isVenueOwner: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 };
@@ -116,6 +117,7 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       selectedWorkspace: session?.user?.selectedWorkspace ?? initialWorkspace,
       workspaces,
       isSuperAdmin,
+      isVenueOwner: userQuery.data?.isVenueOwner ?? false,
       error: errorMessage,
       refetch,
       invalidateUser,
@@ -135,6 +137,7 @@ export const UserProvider: FC<PropsWithChildren> = ({ children }) => {
       errorMessage,
       refetch,
       invalidateUser,
+      userQuery.data?.isVenueOwner,
     ]
   );
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

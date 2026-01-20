@@ -32,7 +32,7 @@ sessionRouter.post('/signup', async (req, res) => {
     return res.status(401).json({ error: 'E-mail is already registered' });
   }
 
-  const userPayload: CreateUserParams = { ...req.body, workspaceId: '' };
+  const userPayload: CreateUserParams = req.body;
   const user = await createNewUser(userPayload, false);
 
   return res.status(201).json({ status: true, user: { id: user.id } });

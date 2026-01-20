@@ -18,9 +18,6 @@ const WizardWorkspaceProfileStep1: React.FC = () => {
           <Trans>Adding a name and description to your workspace</Trans>
         </li>
         <li>
-          <Trans>Setting up a logo to your workspace</Trans>
-        </li>
-        <li>
           <Trans>Adding links for different social networks</Trans>
         </li>
         <li>

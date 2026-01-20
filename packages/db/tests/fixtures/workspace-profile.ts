@@ -10,7 +10,6 @@ export function fakeWorkspaceProfile(
   return {
     workspaceId: fakeWorkspace().id,
     description: faker.lorem.paragraph(),
-    logoFile: faker.system.filePath(),
     linkedinUrl: faker.internet.url(),
     instagramUrl: faker.internet.url(),
     facebookUrl: faker.internet.url(),

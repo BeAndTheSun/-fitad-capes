@@ -10,8 +10,10 @@ import { Trans, useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { z } from 'zod';
 
+import { WorkspaceUserManagement } from '@/components/admin/workspace-user-management';
 import { ErrorMessageBox } from '@/components/error-message-box';
 import type { ModelConfigData } from '@/config/super-admin';
+import { useFileInput } from '@/hooks/use-file-input';
 import { useModelByRoute } from '@/hooks/use-model-by-route';
 import { useRelationsByModel } from '@/hooks/use-relations-by-model';
 import type { NextPageWithLayout } from '@/types/next';
@@ -30,8 +32,11 @@ const AdminRecordComponent: React.FC<AdminRecordComponentProps> = ({
   model,
 }) => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { uploadFile } = useFileInput();
   // Fetch the record data
   const { data, error, isLoading } = useGetRecord(model.name, recordId);
+
   // Setup the update mutation
   const updateRecord = useUpdateRecord({
     params: { model: model.name || '', id: recordId },
@@ -41,33 +46,70 @@ const AdminRecordComponent: React.FC<AdminRecordComponentProps> = ({
 
   const { toast } = useToast();
 
+  const isWorkspace = model.name === 'workspace';
+
+  const fields = isWorkspace
+    ? formFieldsWithRelations.filter((f) => f.name !== 'users')
+    : formFieldsWithRelations;
+
   const { formComponent } = useFormHelper(
     {
       schema: addMinLengthValidationToRequiredStrings(
-        model.schema.extend({
-          password: z.string().min(8).or(z.literal('')).nullable().optional(),
-          flag: z.string().optional(),
-        })
+        isWorkspace
+          ? model.schema.omit({ users: true }).extend({
+              password: z
+                .string()
+                .min(8)
+                .or(z.literal(''))
+                .nullable()
+                .optional(),
+              flag: z.string().optional(),
+            })
+          : model.schema.extend({
+              password: z
+                .string()
+                .min(8)
+                .or(z.literal(''))
+                .nullable()
+                .optional(),
+              flag: z.string().optional(),
+            })
       ),
-      fields: formFieldsWithRelations,
+      fields,
       isLoading: updateRecord.isLoading,
       submitContent: 'Update',
-      onSubmit: (values) => {
-        const { data: basicData, relations } = buildRecordRequest(
-          model,
-          values
-        );
+      onSubmit: async (values) => {
+        const {
+          data: basicData,
+          relations,
+          files,
+        } = buildRecordRequest(model, values);
+        if (files.length > 0) {
+          const uploaded = await Promise.all(
+            files.map(async (fileInfo) => {
+              const { key: uploadedKey } = await uploadFile(fileInfo.file);
+              return { keyName: fileInfo.key, uploadedKey };
+            })
+          );
+          uploaded.forEach(({ keyName, uploadedKey }) => {
+            basicData[keyName] = uploadedKey;
+          });
+        }
+
         updateRecord.mutate(
           {
             data: basicData,
             relations,
           },
           {
-            onSuccess: () => {
+            onSuccess: async () => {
               toast({
                 title: t('Record updated!'),
                 description: t('The record has been updated successfully'),
               });
+              if (model?.url) {
+                await router.push(`/super-admin/${model.url}`);
+              }
             },
             onError: (zodiosError) => {
               const e = formatZodiosError('updateRecord', zodiosError, {
@@ -129,6 +171,7 @@ const AdminRecordComponent: React.FC<AdminRecordComponentProps> = ({
         <Trans>Update Record</Trans>
       </h2>
       {formComponent}
+      {isWorkspace && <WorkspaceUserManagement workspaceId={recordId} />}
     </div>
   );
 };

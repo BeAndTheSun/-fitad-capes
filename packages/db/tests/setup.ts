@@ -15,8 +15,12 @@ import type {
   DbReportsModel,
   DBUserFeatureFlags,
   DbUserModel,
+  DBUserPersonalDataModel,
+  DBUserPersonalDataWhere,
   DbUserWorkspacesModel,
   DbUserWorkspacesWhere,
+  DbVenueModel,
+  DbVenueWhere,
   DbWorkspaceModel,
   DbWorkspaceWhere,
   FeatureFlagsWhere,
@@ -31,6 +35,10 @@ import type {
   DbPasswordRecoveryTokenModel,
   DbPasswordRecoveryTokenWhere,
 } from '@/db/models/password-recovery-token';
+import type {
+  DBVenueUserModel,
+  DBVenueUserWhere,
+} from '@/db/models/venue-users';
 import type { DbWebhookEventsWhere } from '@/db/models/webhook-events';
 import type { DbWebhooksWhere } from '@/db/models/webhooks';
 import type {
@@ -49,11 +57,14 @@ import type {
   integrationKey as integrationKeyTable,
   message,
   passwordRecoveryTokens as passwordRecoveryTokensTable,
+  personalInfo as userPersonalDataTable,
   reports,
   tablesHistory as tablesHistoryTable,
   userFeatureFlags as userFeatureFlagsTable,
   users as usersTable,
   userWorkspaces as userWorkspacesTable,
+  venue as venueTable,
+  venueUsers as venueUsersTable,
   webhookEvents as webhookEventsTable,
   webhooks as webhooksTable,
   workspace as workspacesTable,
@@ -109,8 +120,12 @@ const usersModelMock = {
   findManyByEmail: jest.fn(),
   findUniqueByEmailWithPassword: jest.fn(),
   getUsersOverTime: jest.fn(),
+  getUserCount: jest.fn(),
+  getUsersPerVenue: jest.fn(),
+  getUsersList: jest.fn(),
   getWorkspaceMembers: jest.fn(),
   findManyWithUserWorkspaces: jest.fn(),
+  findAllUsers: jest.fn(),
 };
 
 const passwordRecoveryTokensModelMock = {
@@ -150,6 +165,16 @@ const workspacesModelMock = {
     typeof workspacesTable,
     DbWorkspaceWhere
   >(),
+  findAllWorkspaces: jest.fn(),
+};
+
+const userPersonalDataModelMock = {
+  ...buildDbMainModelMock<
+    DBUserPersonalDataModel,
+    typeof userPersonalDataTable,
+    DBUserPersonalDataWhere
+  >(),
+  getUserPersonalData: jest.fn(),
 };
 
 const userWorkspacesModelMock = {
@@ -160,7 +185,9 @@ const userWorkspacesModelMock = {
   >(),
   findByUserIdAndWorkspaceId: jest.fn(),
   findManyByUserIdAndWorkspaceId: jest.fn(),
+  findAllUserWorkspaces: jest.fn(),
   updateRoleMultipleUsersInWorkspace: jest.fn(),
+  findFirstTrainerByWorkspaceId: jest.fn(),
 };
 
 const memberInvitationsModelMock = {
@@ -194,6 +221,7 @@ const integrationModelMock = {
   findEnabledZapierIntegration: jest.fn(),
   hasWebhookUrlForPlatform: jest.fn(),
 };
+
 const integrationKeyModelMock = {
   ...buildDbMainModelMock<
     DbIntegrationKeyModel,
@@ -254,6 +282,41 @@ const reportsModelMock = {
   ...buildDbMainModelMock<DbReportsModel, typeof reports, ReportsDbWhere>(),
 };
 
+const venueModelMock = {
+  ...buildDbMainModelMock<DbVenueModel, typeof venueTable, DbVenueWhere>(),
+  findAllVenues: jest.fn(),
+  findVenuesByUserId: jest.fn(),
+  generateInvitationToken: jest.fn(),
+  findByInvitationToken: jest.fn(),
+  generateCheckingToken: jest.fn(),
+  findByCheckingToken: jest.fn(),
+  getVenueCount: jest.fn(),
+  getVenuesOverTime: jest.fn(),
+  getVenuesList: jest.fn(),
+  isOwner: jest.fn(),
+  getCountVenuesByOwner: jest.fn(),
+  getVenuesByOwner: jest.fn(),
+  getVenueById: jest.fn(),
+  getVenueByUserId: jest.fn(),
+  updateVenueById: jest.fn(),
+};
+
+const venueUsersModelMock = {
+  ...buildDbMainModelMock<
+    DBVenueUserModel,
+    typeof venueUsersTable,
+    DBVenueUserWhere
+  >(),
+  getAllByVenueId: jest.fn(),
+  deleteById: jest.fn(),
+  deleteByUserId: jest.fn(),
+  isUserInVenue: jest.fn(),
+  findByUserAndVenue: jest.fn(),
+  updateStatus: jest.fn(),
+  getVenuesParticipantsCount: jest.fn(),
+  getParticipantsStatusCounts: jest.fn(),
+};
+
 const DBMock = jest.fn<MockedDb, void[]>().mockImplementation(() => ({
   models: {
     users: usersModelMock,
@@ -273,6 +336,9 @@ const DBMock = jest.fn<MockedDb, void[]>().mockImplementation(() => ({
     tablesHistory: tablesHistoryMock,
     globalFeatureFlags: globalFeatureFlagsModelMock,
     reports: reportsModelMock,
+    venue: venueModelMock,
+    venueUsers: venueUsersModelMock,
+    userPersonalData: userPersonalDataModelMock,
   },
   user: usersModelMock,
   passwordRecoveryToken: passwordRecoveryTokensModelMock,
@@ -291,6 +357,9 @@ const DBMock = jest.fn<MockedDb, void[]>().mockImplementation(() => ({
   tablesHistory: tablesHistoryMock,
   globalFeatureFlags: globalFeatureFlagsModelMock,
   reports: reportsModelMock,
+  venue: venueModelMock,
+  venueUsers: venueUsersModelMock,
+  userPersonalData: userPersonalDataModelMock,
   getModel: jest.fn(),
 }));
 

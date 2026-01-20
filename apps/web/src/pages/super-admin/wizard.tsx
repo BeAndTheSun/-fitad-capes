@@ -3,12 +3,12 @@ import {
   useCreateFeatureFlag,
   useCreateRecord,
   useCreateWorkspaceProfile,
+  useGetRecords,
 } from '@meltstudio/client-common';
 import type { GetServerSideProps } from 'next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 import { z } from 'zod';
 
 import type { ApiCommonErrorType } from '@/api/routers/def-utils';
@@ -16,7 +16,6 @@ import { UserRoleEnum, userRoleList } from '@/common-types/auth';
 import { ErrorComponent } from '@/components/wizard-example/error-component';
 import { FinalComponent } from '@/components/wizard-example/final-component';
 import { WizardWorkspaceProfileStep1 } from '@/components/wizard-example/step-1';
-import { useFileInput } from '@/hooks/use-file-input';
 import type { NextPageWithLayout } from '@/types/next';
 import type { WizardCompletionResult } from '@/ui/wizard';
 import {
@@ -26,6 +25,7 @@ import {
   WizardStep,
 } from '@/ui/wizard';
 import { getUserRoleName } from '@/utils/localization';
+import type { UserAdminType } from '@/zod-schemas/admin';
 
 type WizardWorkspaceSaveResponse = { id: string; name: string };
 
@@ -35,10 +35,6 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
   const WorkspaceProfileSchema = z.object({
     name: z.string().min(1, t('Name is required')),
     description: z.string().min(1, t('Description is required')),
-  });
-
-  const LogoSchema = z.object({
-    logo: z.instanceof(File),
   });
 
   const SocialMediaSchema = z.object({
@@ -59,25 +55,31 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
 
   const wizardSchema = z.object({
     step2: WorkspaceProfileSchema,
-    step3: LogoSchema,
-    step4: SocialMediaSchema,
-    step5: MembersSchema,
+    step3: SocialMediaSchema,
+    step4: MembersSchema,
   });
 
   const createRecord = useCreateRecord({
     params: { model: 'workspace' },
   });
+
+  const { data: userList } = useGetRecords<UserAdminType>({
+    model: 'users',
+    enabled: true,
+    pagination: {
+      pageSize: 0,
+    },
+  });
+
   const createWorkspaceProfile = useCreateWorkspaceProfile();
-  const { uploadFile } = useFileInput();
   const createDefaultFeatureFlags = useCreateFeatureFlag();
-  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   // Final component to show the data
   const finalComponent = (
     data: z.infer<typeof wizardSchema>,
     response: WizardWorkspaceSaveResponse
   ): JSX.Element => {
-    const selectedMembersByName = data.step5?.members.map(({ email }) => email);
+    const selectedMembersByName = data.step4?.members.map(({ email }) => email);
     return (
       <FinalComponent
         name={data.step2.name}
@@ -97,26 +99,22 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
       ApiCommonErrorType | null
     >
   > => {
-    const { step2, step3, step4, step5 } = data;
+    const { step2, step3, step4 } = data;
     const values = {
       name: step2.name,
     };
     try {
-      setIsUploadingFile(true);
-      const { key: logoID } = await uploadFile(step3.logo);
-      setIsUploadingFile(false);
       const result = (await createRecord.mutateAsync({
         data: values,
       })) as { id: string };
       await createWorkspaceProfile.mutateAsync({
         workspaceId: result.id,
         description: step2.description,
-        logoFile: logoID,
-        companyUrl: step4.webpage || undefined,
-        facebookUrl: step4.facebook || undefined,
-        instagramUrl: step4.instagram || undefined,
-        linkedinUrl: step4.linkedin || undefined,
-        members: step5.members,
+        companyUrl: step3.webpage || undefined,
+        facebookUrl: step3.facebook || undefined,
+        instagramUrl: step3.instagram || undefined,
+        linkedinUrl: step3.linkedin || undefined,
+        members: step4.members,
         includeCreatorInWorkspace: true,
       });
       await createDefaultFeatureFlags.mutateAsync({
@@ -130,8 +128,6 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
       const zodiosError = error as Error;
       const e = formatZodiosError('createWorkspaceProfile', zodiosError);
       return { action: WizardCompletionAction.goToError, error: e };
-    } finally {
-      setIsUploadingFile(false);
     }
   };
   return (
@@ -161,9 +157,7 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
         );
       }}
       completionLoading={
-        createRecord.isLoading ||
-        createWorkspaceProfile.isLoading ||
-        isUploadingFile
+        createRecord.isLoading || createWorkspaceProfile.isLoading
       }
     >
       <WizardStep label={t('Step 1')}>
@@ -193,24 +187,6 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
           description: '',
         }}
         stepKey="step2"
-      />
-      <WizardFormStep
-        label={t('Add your logo')}
-        schema={LogoSchema}
-        fields={[
-          {
-            name: 'logo',
-            type: 'file',
-            label: t('Add your logo'),
-            size: 'full',
-            enableCrop: true,
-            required: true,
-          },
-        ]}
-        defaultValues={{
-          logo: null,
-        }}
-        stepKey="step3"
       />
       <WizardFormStep
         label={t('Adding social media links')}
@@ -247,7 +223,7 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
           webpage: '',
           linkedin: '',
         }}
-        stepKey="step4"
+        stepKey="step3"
       />
       <WizardFormStep
         label={t('Add Members')}
@@ -261,16 +237,21 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
             children: [
               {
                 name: 'email',
-                type: 'text',
+                type: 'select',
                 label: t('Email'),
-                size: 'half',
+                size: 'full',
                 required: true,
+                options:
+                  userList?.items?.map((user) => ({
+                    label: `${user.name} <${user.email}>`,
+                    value: user.email,
+                  })) || [],
               },
               {
                 name: 'role',
                 type: 'select',
                 label: t('Role'),
-                size: 'half',
+                size: 'full',
                 options: userRoleList.map((role) => ({
                   label: getUserRoleName(t, role as UserRoleEnum),
                   value: role,
@@ -284,7 +265,7 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
         defaultValues={{
           members: [],
         }}
-        stepKey="step5"
+        stepKey="step4"
       />
     </Wizard>
   );

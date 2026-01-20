@@ -33,10 +33,16 @@ import {
   selectUserFeatureFlagsSchema,
 } from './user-feature-flags';
 import {
+  insertUserPersonalDataSchema,
+  selectUserPersonalDataSchema,
+} from './user-personal-data';
+import {
   insertUserWorkspacesSchema,
   selectUserWorkspacesSchema,
 } from './user-workspaces';
 import { insertUserSchema, selectUserSchemaWithPassword } from './users';
+import { insertVenueSchema, selectVenueSchema } from './venue';
+import { insertVenueUsersSchema, selectVenueUsersSchema } from './venue-users';
 import {
   insertWebhookEventsSchema,
   selectWebhookEventsSchema,
@@ -50,15 +56,57 @@ import {
 
 const relationAdminSchema = z.string();
 
-export const userAdminModelSchema = selectUserSchemaWithPassword.extend({
-  workspaces: z.array(relationAdminSchema).optional().nullish(),
+// Schema for workspace objects returned within user data (list view)
+const workspaceRelationSchema = z.object({
+  userId: z.string().uuid(),
+  workspaceId: z.string().uuid(),
+  role: z.string(),
+  workspace: z.object({
+    id: z.string().uuid(),
+    createdAt: z.string(),
+    name: z.string(),
+  }),
 });
+
+// Workspaces can be either array of objects (list view) or array of strings (single record view)
+const workspacesSchema = z
+  .union([z.array(workspaceRelationSchema), z.array(z.string().uuid())])
+  .optional()
+  .default([]);
+
+export const userAdminModelSchema = selectUserSchemaWithPassword
+  .omit({ password: true })
+  .extend({
+    password: z.string().optional(),
+    featureFlags: z.array(z.unknown()).optional(),
+    workspaces: workspacesSchema,
+  });
 
 export type UserAdminType = z.infer<typeof userAdminModelSchema>;
 
+const workspaceUserSchema = z
+  .object({
+    userId: z.string(),
+    role: z.string(),
+    user: z
+      .object({
+        id: z.string(),
+        email: z.string().optional(),
+        name: z.string().optional(),
+      })
+      .optional(),
+    id: z.string().optional(),
+  })
+  .passthrough();
+
 export const workspaceAdminModelSchema = selectWorkspaceSchema.extend({
-  users: z.array(relationAdminSchema).optional().nullish(),
+  users: z
+    .array(z.union([relationAdminSchema, workspaceUserSchema]))
+    .optional()
+    .nullish(),
 });
+
+export const venueAdminModelSchema = selectVenueSchema.extend({});
 
 // Define a union schema using a tuple
 export const anyModelSchema = z.union([
@@ -70,6 +118,9 @@ export const anyModelSchema = z.union([
   selectUserWorkspacesSchema,
   selectTablesHistorySchema,
   selectGlobalFeatureFlagsSchema,
+  venueAdminModelSchema,
+  selectVenueUsersSchema,
+  selectUserPersonalDataSchema,
 ]);
 
 type UnionKeys<T> = T extends T ? keyof T : never;
@@ -95,6 +146,9 @@ export const modelSchemas = {
   tablesHistory: selectTablesHistorySchema,
   globalFeatureFlags: selectGlobalFeatureFlagsSchema,
   reports: selectReportsSchema,
+  venue: venueAdminModelSchema,
+  venueUsers: selectVenueUsersSchema,
+  userPersonalData: selectUserPersonalDataSchema,
 } as const;
 
 export const insertModelSchemas = {
@@ -115,6 +169,9 @@ export const insertModelSchemas = {
   tablesHistory: insertTablesHistorySchema,
   globalFeatureFlags: insertGlobalFeatureFlagsSchema,
   reports: insertReportsSchema,
+  venue: insertVenueSchema,
+  venueUsers: insertVenueUsersSchema,
+  userPersonalData: insertUserPersonalDataSchema,
 };
 
 export type ModelName = keyof typeof modelSchemas;

@@ -1,25 +1,16 @@
 import { getBaseUrl } from '@meltstudio/core';
-import {
-  ChatBubbleIcon,
-  ClockIcon,
-  Component1Icon,
-  CookieIcon,
-  FileTextIcon,
-  LaptopIcon,
-  Link1Icon,
-  PersonIcon,
-  StackIcon,
-} from '@radix-ui/react-icons';
+import { CookieIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useTranslation } from 'next-i18next';
 
 import { FeatureFlag, useFeatureFlag } from '@/feature-flags/index';
+import { useSidebarItems } from '@/hooks/use-sidebar-items';
 import type { MainNavItem } from '@/ui/main-nav';
 import type { SidebarNavItem } from '@/ui/sidebar-nav';
 
 import { env } from './env';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/explicit-function-return-type
-export const useClientConfig = (isAdmin?: boolean) => {
+export const useClientConfig = () => {
   const { t } = useTranslation();
 
   const reportsFlag = useFeatureFlag(FeatureFlag.REPORTS_MODULE);
@@ -37,84 +28,8 @@ export const useClientConfig = (isAdmin?: boolean) => {
     webhooksFlag.isLoading ||
     integrationsFlag.isLoading;
 
-  const buildSidebarItems = (): SidebarNavItem[] => {
-    const items: SidebarNavItem[] = [
-      {
-        title: t('Dashboard'),
-        href: '/',
-        icon: LaptopIcon,
-      },
-    ];
-
-    if (reportsFlag.released) {
-      items.push({
-        title: t('Reports'),
-        href: '/reports',
-        icon: FileTextIcon,
-      });
-    }
-
-    if (historyFlag.released) {
-      items.push({
-        title: t('History'),
-        href: '/history',
-        icon: ClockIcon,
-      });
-    }
-
-    if (chatsFlag.released) {
-      items.push({
-        title: t('Assistant'),
-        href: '/chat-assistant',
-        icon: ChatBubbleIcon,
-      });
-    }
-
-    if (isAdmin) {
-      const adminChildren: SidebarNavItem[] = [];
-
-      if (membersFlag.released) {
-        adminChildren.push({
-          title: t('Members'),
-          href: '/members',
-          icon: PersonIcon,
-        });
-      }
-
-      adminChildren.push({
-        title: t('Feature Flags'),
-        href: '/feature-flags',
-        icon: StackIcon,
-      });
-
-      if (webhooksFlag.released) {
-        adminChildren.push({
-          title: t('Webhooks'),
-          href: '/webhooks',
-          icon: Link1Icon,
-        });
-      }
-
-      if (integrationsFlag.released) {
-        adminChildren.push({
-          title: t('Integrations'),
-          href: '/integrations',
-          icon: Link1Icon,
-        });
-      }
-
-      if (adminChildren.length > 0) {
-        items.push({
-          title: t('Admin'),
-          icon: Component1Icon,
-          isCollapsible: true,
-          children: adminChildren,
-        });
-      }
-    }
-
-    return items;
-  };
+  // Use the new hook to get sidebar items based on role
+  const roleBasedSidebarItems = useSidebarItems();
 
   const buildProfileSidebarItems = (): SidebarNavItem[] => {
     const items: SidebarNavItem[] = [];
@@ -147,7 +62,7 @@ export const useClientConfig = (isAdmin?: boolean) => {
           href: '/',
         },
       ] satisfies MainNavItem[],
-      sidebarItems: isLoading ? [] : buildSidebarItems(),
+      sidebarItems: isLoading ? [] : roleBasedSidebarItems,
       profileSidebarItems: buildProfileSidebarItems(),
     },
     twoFactorAuth: {

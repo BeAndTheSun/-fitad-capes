@@ -27,8 +27,11 @@ import { reportsRouter } from './routers/reports';
 import { sessionRouter } from './routers/session';
 import { storageRouter } from './routers/storage';
 import { taskRunnerRouter } from './routers/task-runner';
+import { userPersonalDataRouter } from './routers/user-personal-data';
 import { userWorkspacesRouter } from './routers/user-workspaces';
 import { usersRouter } from './routers/users';
+import { venueUsersRouter } from './routers/venue-users';
+import { venuesRouter } from './routers/venues';
 import { webhooksRouter } from './routers/webhooks';
 import { workspaceProfileRouter } from './routers/workspace-profile';
 import { ServiceError } from './types/errors';
@@ -119,6 +122,9 @@ app.use('/api/task-runner', taskRunnerRouter);
 app.use('/api/historic-table', historicTableRouter);
 app.use('/api/user-workspaces', userWorkspacesRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/venues', venuesRouter);
+app.use('/api/venue-users', venueUsersRouter);
+app.use('/api/user-personal-data', userPersonalDataRouter);
 
 // handling expected errors sent by the service layer (/api/src/services)
 app.use(

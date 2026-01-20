@@ -4,6 +4,7 @@
   "version": "2.156.6",
   "dependencies": {
     "@meltstudio/db": "*",
+    "@meltstudio/types": "*",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -19,7 +19,6 @@ export const workspaceProfileApiDef = makeApi([
         schema: z.object({
           workspaceId: z.string(),
           description: z.string(),
-          logoFile: z.string(),
           instagramUrl: z.string().url().optional(),
           facebookUrl: z.string().url().optional(),
           companyUrl: z.string().url().optional(),
@@ -109,7 +108,7 @@ export const workspaceProfileApiDef = makeApi([
         name: 'body',
         schema: z.object({
           description: z.string().optional(),
-          logoFile: z.string().optional(),
+
           instagramUrl: z.string().url().optional(),
           facebookUrl: z.string().url().optional(),
           companyUrl: z.string().url().optional(),

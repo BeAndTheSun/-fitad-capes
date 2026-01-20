@@ -14,6 +14,8 @@ import {
   users as usersTable,
   userWorkspaces,
   userWorkspaces as userWorskpacesTable,
+  venue as venueTable,
+  venueUsers as venueUsersTable,
   workspace as workspaceTable,
 } from '@/db/schema';
 import type { GetQueryRelations } from '@/db/utils';
@@ -265,6 +267,67 @@ export class DbUserModel extends DbModel<
     return completeData;
   }
 
+  public async getUserCount(workspaceId: string): Promise<number> {
+    const result = await this.client
+      .select({
+        count: sql<number>`CAST(COUNT(DISTINCT ${usersTable.id}) AS INTEGER)`,
+      })
+      .from(usersTable)
+      .innerJoin(
+        userWorskpacesTable,
+        eq(usersTable.id, userWorskpacesTable.userId)
+      )
+      .where(eq(userWorskpacesTable.workspaceId, workspaceId))
+      .execute();
+
+    return Number(result[0]?.count ?? 0);
+  }
+
+  public async getUsersPerVenue(
+    workspaceId: string
+  ): Promise<{ id: string; userName: string; venueName: string }[]> {
+    const result = await this.client
+      .select({
+        id: usersTable.id,
+        userName: usersTable.name,
+        venueName: venueTable.name,
+      })
+      .from(venueUsersTable)
+      .innerJoin(usersTable, eq(venueUsersTable.userId, usersTable.id))
+      .innerJoin(venueTable, eq(venueUsersTable.venueId, venueTable.id))
+      .innerJoin(
+        userWorskpacesTable,
+        and(
+          eq(usersTable.id, userWorskpacesTable.userId),
+          eq(userWorskpacesTable.workspaceId, workspaceId)
+        )
+      )
+      .orderBy(usersTable.name)
+      .execute();
+
+    return result as Array<{ id: string; userName: string; venueName: string }>;
+  }
+
+  public async getUsersList(
+    workspaceId: string
+  ): Promise<{ id: string; name: string }[]> {
+    const result = await this.client
+      .select({
+        id: usersTable.id,
+        name: usersTable.name,
+      })
+      .from(usersTable)
+      .innerJoin(
+        userWorskpacesTable,
+        eq(usersTable.id, userWorskpacesTable.userId)
+      )
+      .where(eq(userWorskpacesTable.workspaceId, workspaceId))
+      .orderBy(usersTable.name)
+      .execute();
+
+    return result;
+  }
+
   public async getWorkspaceMembers(
     workspaceId: string
   ): Promise<DbUserWithRole[]> {
@@ -355,5 +418,72 @@ export class DbUserModel extends DbModel<
       .execute();
 
     return results as unknown as DbUserWithRole[];
+  }
+
+  public async findAllUsers({
+    filters,
+    pagination,
+  }: {
+    filters?: { search?: string };
+    pagination: { pageIndex: number; pageSize: number };
+  }): Promise<{ items: DbUserExtended[]; total: number }> {
+    const conditions: (SQL | undefined)[] = [];
+
+    if (filters?.search) {
+      const search = `%${filters.search}%`;
+      conditions.push(
+        or(ilike(usersTable.name, search), ilike(usersTable.email, search))
+      );
+    }
+
+    const pageSize = pagination?.pageSize ?? 10;
+    const pageIndex = pagination?.pageIndex ?? 0;
+
+    const whereCondition =
+      conditions.length > 0 ? and(...conditions) : undefined;
+
+    const itemsPromise =
+      pageSize !== 0
+        ? this.client.query.users.findMany({
+            columns: { password: false },
+            where: whereCondition,
+            with: {
+              featureFlags: true,
+              workspaces: {
+                with: {
+                  workspace: true,
+                },
+              },
+            },
+            orderBy: (u, { asc }) => [asc(u.name)],
+            limit: pageSize,
+            offset: pageIndex * pageSize,
+          })
+        : this.client.query.users.findMany({
+            columns: { password: false },
+            where: whereCondition,
+            with: {
+              featureFlags: true,
+              workspaces: {
+                with: {
+                  workspace: true,
+                },
+              },
+            },
+            orderBy: (u, { asc }) => [asc(u.name)],
+          });
+
+    const [items, totalResult] = await Promise.all([
+      itemsPromise,
+      this.client
+        .select({ count: sql<number>`count(*)` })
+        .from(usersTable)
+        .where(whereCondition)
+        .execute(),
+    ]);
+
+    const total = Number(totalResult[0]?.count ?? 0);
+
+    return { items: items as DbUserExtended[], total };
   }
 }

@@ -16,7 +16,7 @@ export const sessionApiDef = makeApi([
         type: 'Body',
         description: 'register user',
         name: 'body',
-        schema: CreateUserParamsSchema.omit({ workspaceId: true }),
+        schema: CreateUserParamsSchema.omit({ workspaceId: true, role: true }),
       },
     ],
     response: z.object({

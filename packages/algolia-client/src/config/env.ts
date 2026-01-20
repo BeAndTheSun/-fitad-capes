@@ -1,11 +1,11 @@
 export const config = {
   algolia: {
     app: {
-      id: process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
+      id: 'NAUCAHLU8Q',
     },
     api: {
-      adminKey: process.env.ALGOLIA_ADMIN_API_KEY,
-      searchKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY,
+      adminKey: 'e57cef8edb1b3984273a2a7a9fda1c8a',
+      searchKey: '6f9740f78b3eb2f0dae0d8304fe5fc76',
     },
   },
 };

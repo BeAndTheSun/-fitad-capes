@@ -31,7 +31,7 @@ describe('POST /', () => {
     });
     mockedDb.user.findUniqueByEmail.mockResolvedValue(user);
     const workspace = fakeWorkspace();
-    const mockData = [{ date: '2023-01-01', users: 10 }];
+    const mockData = [{ date: '2023-01-01', count: 10 }];
     mockedDb.user.getUsersOverTime = jest.fn().mockResolvedValue(mockData);
 
     const response = await request(app)
@@ -40,10 +40,11 @@ describe('POST /', () => {
       .send({
         metric: QueryType.USERS_OVER_TIME,
         workspaceId: workspace.id,
+        sessionUserId: user.id,
       });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockData);
+    expect(response.body).toEqual([{ label: '2023-01-01', count: 10 }]);
     expect(mockedDb.user.getUsersOverTime).toHaveBeenCalledWith(workspace.id);
   });
 
@@ -66,8 +67,21 @@ describe('POST /', () => {
         expect.objectContaining({
           code: 'invalid_enum_value',
           message:
-            "Invalid enum value. Expected 'USERS_OVER_TIME' | 'WORKSPACES_OVER_TIME', received 'UNKNOWN_METRIC'",
-          options: ['USERS_OVER_TIME', 'WORKSPACES_OVER_TIME'],
+            "Invalid enum value. Expected 'USERS_OVER_TIME' | 'WORKSPACES_OVER_TIME' | 'TOTAL_USERS' | 'TOTAL_VENUES' | 'USERS_PER_VENUE' | 'VENUES_OVER_TIME' | 'USERS_LIST' | 'VENUES_LIST' | 'TOTAL_VENUES_BY_OWNER' | 'SUPER_PARTICIPANTS_ON_VENUES_BY_OWNER' | 'TOP_3_VENUES_WITH_MOST_MEMBERS' | 'PARTICIPANTS_BY_STATUS_BY_OWNER', received 'UNKNOWN_METRIC'",
+          options: [
+            'USERS_OVER_TIME',
+            'WORKSPACES_OVER_TIME',
+            'TOTAL_USERS',
+            'TOTAL_VENUES',
+            'USERS_PER_VENUE',
+            'VENUES_OVER_TIME',
+            'USERS_LIST',
+            'VENUES_LIST',
+            'TOTAL_VENUES_BY_OWNER',
+            'SUPER_PARTICIPANTS_ON_VENUES_BY_OWNER',
+            'TOP_3_VENUES_WITH_MOST_MEMBERS',
+            'PARTICIPANTS_BY_STATUS_BY_OWNER',
+          ],
           path: ['metric'],
           received: 'UNKNOWN_METRIC',
         }),
