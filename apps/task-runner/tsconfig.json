@@ -9,7 +9,8 @@
       "@/db/*": ["../../packages/db/src/*"],
       "@/mailing/*": ["../../packages/mailing/src/*"],
       "@/tasks/*": ["../../packages/tasks/src/*"],
-      "@/task-runner/*": ["./src/*"]
+      "@/task-runner/*": ["./src/*"],
+      "@/common/*": ["../../packages/common/src/*"]
     }
   },
   "include": ["src", "tests", "jest.config.ts", "tsup.config.ts"]
