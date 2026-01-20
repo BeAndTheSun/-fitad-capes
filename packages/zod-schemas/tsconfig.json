@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@/zod-schemas/*": ["./src/*"],
-      "@/db/*": ["../db/src/*"]
+      "@/db/*": ["../db/src/*"],
+      "@/common/*": ["../common/src/*"]
     }
   },
   "include": ["src", "tests", "jest.config.ts"]

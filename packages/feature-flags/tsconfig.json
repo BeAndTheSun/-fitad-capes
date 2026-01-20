@@ -7,7 +7,8 @@
       "@/feature-flags/*": ["./src/*"],
       "@/api/*": ["../api/src/*"],
       "@/client-common/*": ["../client-common/src/*"],
-      "@/db/*": ["../db/src/*"]
+      "@/db/*": ["../db/src/*"],
+      "@/common/*": ["../common/src/*"]
     }
   },
   "include": ["src", "tests", "jest.config.ts"]

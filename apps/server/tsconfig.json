@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "paths": {
       "@/db/*": ["../../packages/db/src/*"],
-
+      "@/common/*": ["../../packages/common/src/*"],
       "@/server": ["src/server"],
       "@/utils/*": ["src/utils/*"],
       "@/routes/*": ["src/routes/*"]

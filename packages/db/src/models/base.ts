@@ -1,7 +1,6 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-console */
 /* eslint-disable max-classes-per-file */
-// eslint-disable-next-line import/no-extraneous-dependencies
 import type { ActivityStreamData, RowEmbeddingData } from '@meltstudio/types';
 import { ActivityActions } from '@meltstudio/types';
 import type { InferSelectModel, Table } from 'drizzle-orm';
@@ -31,6 +30,8 @@ import type {
   SelectResult,
 } from 'drizzle-orm/query-builders/select.types';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { handleWebhookEvent } from '@/common/handlers/webhook/handler-event';
 import type { AlgoliaDataConfigCl } from '@/db/algolia/model/base';
 import { algoliaTablesHistory } from '@/db/algolia/model/tables-history';
 import * as schema from '@/db/schema';
