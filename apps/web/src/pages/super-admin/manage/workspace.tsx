@@ -137,7 +137,11 @@ const ManageWorkspaceRecord: React.FC<{ recordId?: string | undefined }> = ({
               )}
             />
           </div>
-          <Button className="mt-4 w-auto" type="submit">
+          <Button
+            className="mt-4 w-auto"
+            type="submit"
+            loading={isLoading || updateRecord.isLoading}
+          >
             Submit
           </Button>
         </form>
