@@ -184,10 +184,14 @@ type UseColumnsProps = {
   relationLabelMap: Record<string, Record<string, string>>;
 };
 
-const getManageUrl = (modelName: string, id: string): string =>
-  modelName === 'venue'
-    ? `/super-admin/manage/venue?id=${id}`
-    : `/super-admin/${modelName}/${id}`;
+const MANAGE_ROUTES: Record<string, (id: string) => string> = {
+  workspace: (id) => `/super-admin/manage/workspace?id=${id}`,
+  venue: (id) => `/super-admin/manage/venue?id=${id}`,
+};
+
+export const getManageUrl = (modelName: string, id: string): string => {
+  return MANAGE_ROUTES[modelName]?.(id) ?? `/super-admin/${modelName}/${id}`;
+};
 
 const useColumns = ({
   modelName,

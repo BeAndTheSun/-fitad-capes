@@ -65,6 +65,7 @@ const VenueManagePage: NextPageWithLayout = () => {
     data: venueData,
     error: venueError,
     isLoading: venueLoading,
+    refetch: refetchVenue,
   } = useGetRecord('venue', venueId);
 
   const {
@@ -136,7 +137,7 @@ const VenueManagePage: NextPageWithLayout = () => {
             workspaceId={selectedWorkspace.id}
             participants={participants}
             loading={participantsLoading}
-            onRefetch={() => refetchParticipants()}
+            onRefetch={refetchParticipants}
           />
         </TabsContent>
 
@@ -144,7 +145,7 @@ const VenueManagePage: NextPageWithLayout = () => {
           <CheckInTab
             venue={venue}
             workspaceId={selectedWorkspace.id}
-            onRefetch={() => refetchParticipants()}
+            onRefetch={refetchVenue}
           />
         </TabsContent>
 
