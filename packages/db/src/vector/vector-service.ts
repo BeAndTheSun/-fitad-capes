@@ -136,14 +136,15 @@ export class VectorDBService {
     originTable?: keyof typeof dbSchemas
   ): Promise<void> {
     const filteredRows = await Promise.all(
-      rows.map(async (row) => this.processRowData(row, table, originTable))
+      rows.map(async (row) =>
+        this.processRowData(row, table, workspaceId, originTable)
+      )
     );
-    const texts = filteredRows.map(({ concatenatedData }) => concatenatedData);
 
+    const texts = filteredRows.map(({ concatenatedData }) => concatenatedData);
     try {
       // Generate embeddings in batch
       const embeddings = await this.openai.getEmbeddings(texts);
-
       // Upsert embeddings for each filtered row
       const upsertPromises = filteredRows.map(async (filteredRow, index) => {
         const { rowId, filterRow } = filteredRow;
@@ -170,6 +171,7 @@ export class VectorDBService {
   private async processRowData(
     row: RowData,
     table: keyof typeof dbSchemas,
+    workspaceId: string | null,
     originTable?: keyof typeof dbSchemas
   ): Promise<{ rowId: string; filterRow: RowData; concatenatedData: string }> {
     const filterRow: RowData = { id: row.id };
@@ -231,6 +233,7 @@ export class VectorDBService {
           await this.updateRelatedEmbeddings(
             relation.relationTable,
             table,
+            workspaceId,
             [],
             relation.foreignKey,
             row.id
@@ -303,6 +306,7 @@ export class VectorDBService {
             await this.updateRelatedEmbeddings(
               relation.relatedTable,
               table,
+              workspaceId,
               relatedIds
             );
           }
@@ -371,6 +375,7 @@ export class VectorDBService {
   private async updateRelatedEmbeddings(
     relatedTable: keyof typeof dbSchemas,
     originTable: keyof typeof dbSchemas, // parameter to avoid infinite loops
+    workspaceId: string | null,
     relatedIds: string[] = [],
     foreignKey?: string,
     primaryId?: string
@@ -403,7 +408,12 @@ export class VectorDBService {
         logger.error(`No related rows found for ${relatedTable}`);
         return;
       }
-      await this.embedRowsBatch(relatedTable, relatedRows, originTable);
+      await this.embedRowsBatch(
+        relatedTable,
+        relatedRows,
+        workspaceId,
+        originTable
+      );
     }
   }
 

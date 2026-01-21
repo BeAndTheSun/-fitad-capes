@@ -466,6 +466,7 @@
   "Venue updated": "Venue updated",
   "Failed to update venue": "Failed to update venue",
   "Create Venue": "Create Venue",
+  "Manage Workspace {data?.name}": "Manage Workspace {data?.name}",
   "Description is required": "Description is required",
   "Step 1": "Step 1",
   "Name and Description": "Name and Description",

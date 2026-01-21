@@ -255,6 +255,7 @@
   "Manage Venue": "Manage Venue",
   "Manage Venue {data?.name}": "Manage Venue {data?.name}",
   "Manage Venues": "Manage Venues",
+  "Manage Workspace {data?.name}": "Gestionar espacio de trabajo {data?.name}",
   "Manage participants and their status in this venue": "",
   "Manage venue participants and settings": "Administrar participantes y configuración del lugar",
   "Manage your venues edit and delete them": "Manage your venues edit and delete them",

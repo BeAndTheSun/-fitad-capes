@@ -261,11 +261,13 @@ export class AlgoliaModelDef<T extends PgTable> {
     return rows.map((row) => this.filterObjectByBaseConfig(row));
   }
 
-  public async getWithRelations(id: string): Promise<T['$inferSelect']> {
+  public async getWithRelations(id: string): Promise<T['$inferSelect'] | null> {
     const data = (await this.getFromDb(id)) as unknown as Record<
       string,
       unknown
     >;
+
+    if (!data) return null;
 
     const promises: Promise<void>[] = [];
 
@@ -369,8 +371,8 @@ export class AlgoliaModelDef<T extends PgTable> {
 
   public async updateInAlgolia(pk: string): Promise<void> {
     const data = await this.getWithRelations(pk);
+    if (!data) return;
 
-    // Update Algolia object
     await this.client.saveObject({
       indexName: this.indexName,
       body: {
@@ -390,13 +392,17 @@ export class AlgoliaModelDef<T extends PgTable> {
     const filteredDataPromises = data.map(async ({ objectID }) => {
       const dataRow = await this.getWithRelations(objectID);
 
+      if (!dataRow) return null;
+
       return {
         objectID,
         ...dataRow,
       };
     });
 
-    const filteredData = await Promise.all(filteredDataPromises);
+    const filteredData = (await Promise.all(filteredDataPromises)).filter(
+      (item): item is NonNullable<typeof item> => item !== null
+    );
 
     // Update Algolia objects
     await client.saveObjects({
