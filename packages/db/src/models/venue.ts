@@ -1,10 +1,22 @@
 import crypto from 'crypto';
 import type { SQL } from 'drizzle-orm';
-import { and, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNull,
+  lte,
+  or,
+  sql,
+} from 'drizzle-orm';
 import type { PgSelect } from 'drizzle-orm/pg-core';
 
 import type { DbVenue, DbVenueExtended } from '@/db/schema';
 import {
+  users,
+  userWorkspaces,
   userWorkspaces as userWorkspacesTable,
   venue as venueTable,
   venueUsers,
@@ -439,5 +451,44 @@ export class DbVenueModel extends DbModel<
       .returning()
       .execute();
     return result[0];
+  }
+
+  public async findManyVenueByOwner(opts?: {
+    args?: {
+      where?: {
+        from?: string;
+        to?: string;
+        workspaceId?: string;
+        venueOwnerId?: string;
+      };
+    };
+  }): Promise<DbVenue[]> {
+    const { args } = opts ?? {};
+    const { workspaceId, from, to, venueOwnerId } = args?.where || {};
+
+    const whereConditions = [];
+
+    if (!venueOwnerId) {
+      throw new Error('venueOwnerId is required');
+    }
+
+    if (workspaceId) {
+      whereConditions.push(eq(userWorkspaces.workspaceId, workspaceId));
+    }
+
+    if (from) {
+      whereConditions.push(gte(users.createdAt, from));
+    }
+
+    if (to) {
+      whereConditions.push(lte(users.createdAt, to));
+    }
+
+    const results = await this.client
+      .select()
+      .from(this.dbTable)
+      .where(eq(this.dbTable.ownerId, venueOwnerId));
+
+    return results as unknown as DbVenue[];
   }
 }

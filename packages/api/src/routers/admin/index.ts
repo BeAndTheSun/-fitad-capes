@@ -132,6 +132,20 @@ adminRouter.get('/:model', async (req, res) => {
         total = venueResult.total;
         break;
       }
+      // New case for globalFeatureFlags model
+      // We are not implementing pagination or filters for this model as per requirements
+      case 'globalFeatureFlags': {
+        const globalFeatureFlags = await db.globalFeatureFlags.findMany();
+        const result = {
+          items: globalFeatureFlags,
+          total: globalFeatureFlags.length,
+          limit: 0,
+          offset: 0,
+          pageCount: 0,
+          currentPage: 0,
+        };
+        return res.status(200).json(result);
+      }
 
       default:
         return res.status(400).json({ error: 'Unsupported model' });

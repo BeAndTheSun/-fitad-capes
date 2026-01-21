@@ -1,5 +1,6 @@
 import type { AnyModelKey } from '@meltstudio/zod-schemas';
 import {
+  // selectGlobalFeatureFlagsSchema,
   userAdminModelSchema,
   venueAdminModelSchema,
   workspaceAdminModelSchema,
@@ -96,6 +97,32 @@ export const modelsConfig: ModelConfig = {
     sidebar: true,
     isExportable: true,
   },
+  // DONT REMOVE THE GLOBAL FEATURE FLAGS,
+  // UNCOMMENT WHEN YOU WANT TO USE IT AGAIN
+  // globalFeatureFlags: {
+  //   name: 'globalFeatureFlags',
+  //   displayName: <Trans>Global Feature Flags</Trans>,
+  //   indexName: AlgoliaIndex.GLOBAL_FEATURE_FLAGS,
+  //   fields: [
+  //     { label: 'ID', type: 'ID', key: 'id' },
+  //     { label: <Trans>Flag</Trans>, type: 'text', key: 'flag' },
+  //     { label: <Trans>Description</Trans>, type: 'text', key: 'description' },
+  //     { label: <Trans>Released</Trans>, type: 'boolean', key: 'released' },
+  //     {
+  //       label: <Trans>Allow Workspace Control</Trans>,
+  //       type: 'boolean',
+  //       key: 'allowWorkspaceControl',
+  //     },
+  //   ],
+  //   url: 'globalFeatureFlags',
+  //   sidebar: true,
+  //   schema: selectGlobalFeatureFlagsSchema.pick({
+  //     description: true,
+  //     released: true,
+  //     allowWorkspaceControl: true,
+  //   }),
+  //   isExportable: false,
+  // },
   workspace: {
     name: 'workspace',
     displayName: <Trans>Workspaces</Trans>,
@@ -118,7 +145,6 @@ export const modelsConfig: ModelConfig = {
     }),
     isExportable: true,
   },
-
   venue: {
     name: 'venue',
     displayName: <Trans>Venues</Trans>,

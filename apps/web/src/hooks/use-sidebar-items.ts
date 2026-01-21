@@ -1,5 +1,6 @@
 import { UserRoleEnum } from '@meltstudio/types';
 import {
+  FileTextIcon,
   LaptopIcon,
   LightningBoltIcon,
   PersonIcon,
@@ -82,11 +83,18 @@ export function useSidebarItems(
     }
 
     if (isVenueOwner) {
-      items.push({
-        title: t('Manage Venues'),
-        href: '/manage-venues',
-        icon: LightningBoltIcon,
-      });
+      items.push(
+        {
+          title: t('Manage Venues'),
+          href: '/manage-venues',
+          icon: LightningBoltIcon,
+        },
+        {
+          title: t('Reports'),
+          href: '/reports',
+          icon: FileTextIcon,
+        }
+      );
     }
 
     return items;

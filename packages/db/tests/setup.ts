@@ -299,6 +299,7 @@ const venueModelMock = {
   getVenueById: jest.fn(),
   getVenueByUserId: jest.fn(),
   updateVenueById: jest.fn(),
+  findManyVenueByOwner: jest.fn(),
 };
 
 const venueUsersModelMock = {

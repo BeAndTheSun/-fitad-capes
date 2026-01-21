@@ -2,7 +2,7 @@ export const DEFAULT_FEATURE_FLAGS = [
   {
     flag: 'REPORTS_MODULE',
     description: 'Module for generating reports.',
-    released: false,
+    released: true,
   },
   {
     flag: 'HISTORY_MODULE',

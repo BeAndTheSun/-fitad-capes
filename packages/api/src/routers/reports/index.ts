@@ -6,6 +6,7 @@ import { env } from 'process';
 import { ctx } from '@/api/context';
 import { db } from '@/api/db';
 import { reportsApiDef } from '@/api/routers/reports/def';
+import type { DbVenue } from '@/db/schema';
 
 export const reportsRouter = ctx.router(reportsApiDef);
 
@@ -33,45 +34,57 @@ type WebhookData = {
   eventTypes: string[];
 };
 
-type TableDataType = UserData | TablesHistoryData | WebhookData;
+type TableDataType = UserData | TablesHistoryData | WebhookData | DbVenue;
 
 const getTableData = async (
   tableName: string,
   workspaceId: string,
   from: string,
-  to: string
+  to: string,
+  venueOwnerId?: string
 ): Promise<TableDataType[]> => {
   switch (tableName) {
-    case 'users':
-      return db.user.findManyWithUserWorkspaces({
+    // case 'users':
+    //   return db.user.findManyWithUserWorkspaces({
+    //     args: {
+    //       where: {
+    //         from,
+    //         to,
+    //         workspaceId,
+    //       },
+    //     },
+    //   }) as Promise<UserData[]>;
+    // case 'tables_history':
+    //   return db.tablesHistory.findManyWithUserName({
+    //     args: {
+    //       where: {
+    //         from,
+    //         to,
+    //         workspaceId,
+    //       },
+    //     },
+    //   }) as Promise<TablesHistoryData[]>;
+    // case 'webhooks':
+    //   return db.webhooks.findManyWithWhere({
+    //     args: {
+    //       where: {
+    //         workspaceId,
+    //         from,
+    //         to,
+    //       },
+    //     },
+    //   }) as Promise<WebhookData[]>;
+    case 'venue':
+      return db.venue.findManyVenueByOwner({
         args: {
           where: {
             from,
             to,
             workspaceId,
+            venueOwnerId,
           },
         },
-      }) as Promise<UserData[]>;
-    case 'tables_history':
-      return db.tablesHistory.findManyWithUserName({
-        args: {
-          where: {
-            from,
-            to,
-            workspaceId,
-          },
-        },
-      }) as Promise<TablesHistoryData[]>;
-    case 'webhooks':
-      return db.webhooks.findManyWithWhere({
-        args: {
-          where: {
-            workspaceId,
-            from,
-            to,
-          },
-        },
-      }) as Promise<WebhookData[]>;
+      });
     default:
       throw new Error(`Table ${tableName} not supported`);
   }
@@ -85,7 +98,16 @@ reportsRouter.post('/', async (req, res) => {
   const { user } = req.auth;
   const { workspaceId, table, from, to, name } = req.body;
 
-  const tableData = await getTableData(table, workspaceId, from, to);
+  // this report is only for venue owners
+  const venueOwnerId = user.id;
+
+  const tableData = await getTableData(
+    table,
+    workspaceId,
+    from,
+    to,
+    venueOwnerId
+  );
 
   if (!Array.isArray(tableData) || tableData.length === 0) {
     return res.status(404).json({
