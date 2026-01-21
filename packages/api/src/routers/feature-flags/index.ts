@@ -22,7 +22,6 @@ featureFlagsRouter.get('/:workspaceId/list', async (req, res) => {
   flagsGlobal.forEach((globalFlag) => {
     globalFlagsMap.set(globalFlag.flag, globalFlag);
   });
-
   const releasedFlags = flags
     .filter((flag) => {
       const globalFlag = globalFlagsMap.get(flag.flag);

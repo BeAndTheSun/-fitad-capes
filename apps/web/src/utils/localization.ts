@@ -153,6 +153,8 @@ export function getLocalizedReportTableName(
       return t('History');
     case 'webhooks':
       return t('Webhooks');
+    case 'venue':
+      return t('Venues');
     default:
       return t('Unknown Report Table');
   }
