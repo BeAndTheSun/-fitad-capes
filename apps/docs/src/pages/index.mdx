@@ -1,7 +1,6 @@
-# Melt's Template for Turborepo
+# Template for Turborepo
 
 Welcome to the project! This is a monorepo designed to streamline development and collaboration across multiple applications and shared libraries. It leverages modern tooling like Turborepo, Yarn Workspaces, and TypeScript to ensure scalability and maintainability. This document provides an overview of the project structure to help you navigate and understand its components.
-
 
 This template includes the following things:
 
@@ -36,9 +35,11 @@ To include translations in your components, you can use either the `useTranslati
 Before making a commit, it’s important to update the translation files to reflect any changes made. Follow these steps:
 
 1. Run the command to scan for translations:
+
    ```bash
    yarn i18n:scan
    ```
+
    This command will generate English keys in the `translations/es.json` file.
 
 2. Add Spanish translations:
@@ -186,11 +187,13 @@ The `packages` folder contains shared libraries and utilities:
 To create a new package, follow these steps:
 
 1. **Navigate to the Packages Directory**:
+
    ```bash
    cd packages
    ```
 
 2. **Create a New Folder** for Your Package:
+
    ```bash
    mkdir my-new-package
    cd my-new-package
@@ -198,12 +201,14 @@ To create a new package, follow these steps:
 
 3. **Initialize a New Package**:
    Use the following command to create a `package.json` file:
+
    ```bash
    yarn init -y
    ```
 
 4. **Add Required Dependencies**:
    Install any necessary dependencies for your package:
+
    ```bash
    yarn add some-dependency
    yarn add --dev some-dev-dependency
@@ -214,6 +219,7 @@ To create a new package, follow these steps:
 
 6. **Set Up Build Scripts**:
    If needed, configure build scripts in your `package.json`, for example:
+
    ```json
    {
      "scripts": {
@@ -234,11 +240,13 @@ To create a new package, follow these steps:
 ### How to Add a New Application
 
 1. **Navigate to the Apps Directory**:
+
    ```bash
    cd apps
    ```
 
 2. **Create a New Folder** for Your Application:
+
    ```bash
    mkdir my-new-app
    cd my-new-app
@@ -246,6 +254,7 @@ To create a new package, follow these steps:
 
 3. **Initialize the Application**:
    Depending on the type of application, use an appropriate template (e.g., Next.js, Express):
+
    ```bash
    npx create-next-app@latest .
    ```
@@ -255,18 +264,21 @@ To create a new package, follow these steps:
 
 5. **Install Dependencies**:
    Add any dependencies needed for your app:
+
    ```bash
    yarn add some-dependency
    ```
 
 6. **Link Shared Packages**:
    Use `yarn workspace` to link any shared packages:
+
    ```bash
    yarn workspace my-new-app add @project/ui
    ```
 
 7. **Run the Application**:
    Start the development server:
+
    ```bash
    yarn dev
    ```
@@ -277,4 +289,3 @@ To create a new package, follow these steps:
 ---
 
 For more details, refer to the specific documentation for each package and application in the project.
-

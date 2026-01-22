@@ -16,6 +16,7 @@ import {
   TwoFactorProvider,
 } from '@meltstudio/types';
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { getServerSession } from 'next-auth';
@@ -141,6 +142,9 @@ const SignInPage: NextPageWithLayout<ServerSideProps> = (props) => {
 
   return showOTP ? (
     <div className="flex flex-col space-y-2 text-center">
+      <Head>
+        <title>{t('Sign in')}</title>
+      </Head>
       <Typography.H1 className="text-2xl font-semibold tracking-tight lg:text-2xl">
         <Trans>Sign in to your account</Trans>
       </Typography.H1>
@@ -187,6 +191,9 @@ const SignInPage: NextPageWithLayout<ServerSideProps> = (props) => {
     </div>
   ) : (
     <>
+      <Head>
+        <title>{t('Sign in')}</title>
+      </Head>
       <div className="flex flex-col space-y-2 text-center">
         <Typography.H1 className="text-2xl font-semibold tracking-tight lg:text-2xl">
           <Trans>Sign in to your account</Trans>

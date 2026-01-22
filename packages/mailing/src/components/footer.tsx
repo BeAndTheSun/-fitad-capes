@@ -51,7 +51,7 @@ export const Footer: React.FC = () => {
                 margin: '0',
               }}
             >
-              © {new Date().getFullYear()} Melt Studio. All rights reserved.
+              © {new Date().getFullYear()} FIT ADS. All rights reserved.
             </Text>
           </Column>
         </Section>

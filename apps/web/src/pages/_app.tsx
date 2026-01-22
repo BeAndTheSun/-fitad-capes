@@ -3,6 +3,7 @@ import '@meltstudio/theme/globals.css';
 import { createQueryClient } from '@meltstudio/client-common';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Inter as FontSans } from 'next/font/google';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { SessionProvider } from 'next-auth/react';
 import { appWithTranslation } from 'next-i18next';
@@ -74,6 +75,10 @@ const App = (props: AppPropsWithLayout): JSX.Element => {
           --font-sans: ${fontSans.style.fontFamily};
         }
       `}</style>
+
+      <Head>
+        <title>FIT ADS</title>
+      </Head>
 
       <QueryClientProvider client={queryClient}>
         <UserProvider>

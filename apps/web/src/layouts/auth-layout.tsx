@@ -16,8 +16,7 @@ export const AuthLayout: React.FC<React.PropsWithChildren> = (props) => {
       </div>
 
       <div className="mx-auto flex w-full flex-col items-center justify-center space-y-6 p-8 sm:w-[350px] sm:p-0">
-        <Image src="/logo.svg" alt="Logo" width={128} height={28} />
-
+        <Image src="/logo.png" alt="Logo" width={228} height={58} />
         {children}
       </div>
     </div>
