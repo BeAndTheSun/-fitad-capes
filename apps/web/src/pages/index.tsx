@@ -1,6 +1,7 @@
 import { Typography } from '@meltstudio/ui';
 import type { GetServerSideProps } from 'next';
-import { Trans } from 'next-i18next';
+import Head from 'next/head';
+import { Trans, useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 import { Loading } from '@/components/common/loading';
@@ -19,9 +20,17 @@ const HomePage: NextPageWithLayout = () => {
     shouldShowMemberDashboard,
     shouldShowVenueOwnerDashboard,
   } = useAdminViewAs();
+  const { t } = useTranslation();
 
   if (!user || isLoading) {
-    return <Loading />;
+    return (
+      <>
+        <Head>
+          <title>{t('Dashboard')}</title>
+        </Head>
+        <Loading />
+      </>
+    );
   }
 
   // Check if role view should be shown but no workspace is available
@@ -77,18 +86,23 @@ const HomePage: NextPageWithLayout = () => {
   }
 
   return (
-    <div>
-      <Typography.H1>
-        <Trans>Welcome,</Trans> {user.name || user.email} (
-        {selectedWorkspace?.name})
-      </Typography.H1>
-      <Typography.H2>
-        <Trans>Metrics</Trans>
-      </Typography.H2>
+    <>
+      <Head>
+        <title>{t('Dashboard')}</title>
+      </Head>
       <div>
-        <MetricsDashboard />
+        <Typography.H1>
+          <Trans>Welcome,</Trans> {user.name || user.email} (
+          {selectedWorkspace?.name})
+        </Typography.H1>
+        <Typography.H2>
+          <Trans>Metrics</Trans>
+        </Typography.H2>
+        <div>
+          <MetricsDashboard />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -18,7 +18,7 @@ const Welcome: EmailTemplate = () => {
         <Section className="px-6 py-8">
           <Column align="center">
             <Heading className="mb-4 text-center text-2xl font-bold sm:text-3xl">
-              Welcome to Melt Studio!
+              Welcome to Fit ADS!
             </Heading>
             <EmailText className="mb-6 max-w-md text-center text-base text-gray-600">
               Thank you for creating your account. You're now ready to start
@@ -39,6 +39,6 @@ const Welcome: EmailTemplate = () => {
     </BaseLayout>
   );
 };
-Welcome.subject = 'Welcome to Melt Studio!';
+Welcome.subject = 'Welcome to Fit ADS!';
 
 export default Welcome;

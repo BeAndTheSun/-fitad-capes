@@ -1,5 +1,5 @@
 import { getBaseUrl } from '@meltstudio/core';
-import { CookieIcon, PersonIcon } from '@radix-ui/react-icons';
+import { PersonIcon, RocketIcon } from '@radix-ui/react-icons';
 import { useTranslation } from 'next-i18next';
 
 import { FeatureFlag, useFeatureFlag } from '@/feature-flags/index';
@@ -52,8 +52,8 @@ export const useClientConfig = () => {
       url: `${getBaseUrl()}/api`,
     },
     app: {
-      logo: CookieIcon,
-      name: 'Melt',
+      logo: RocketIcon,
+      name: 'FIT ADS',
     },
     nav: {
       items: [
