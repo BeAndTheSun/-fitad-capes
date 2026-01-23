@@ -42,5 +42,8 @@ export type DbVenueUserWithRelations = DbVenueUser & {
   };
   venue: {
     id: string;
+    name: string;
+    start_event_time: Date | null;
+    end_event_time: Date | null;
   };
 };

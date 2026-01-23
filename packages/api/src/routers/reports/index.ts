@@ -6,7 +6,7 @@ import { env } from 'process';
 import { ctx } from '@/api/context';
 import { db } from '@/api/db';
 import { reportsApiDef } from '@/api/routers/reports/def';
-import type { DbVenue } from '@/db/schema';
+import type { DbVenue, DbVenueUserWithRelations } from '@/db/schema';
 
 export const reportsRouter = ctx.router(reportsApiDef);
 
@@ -34,7 +34,12 @@ type WebhookData = {
   eventTypes: string[];
 };
 
-type TableDataType = UserData | TablesHistoryData | WebhookData | DbVenue;
+type TableDataType =
+  | UserData
+  | TablesHistoryData
+  | WebhookData
+  | DbVenue
+  | DbVenueUserWithRelations;
 
 const getTableData = async (
   tableName: string,
@@ -85,6 +90,11 @@ const getTableData = async (
           },
         },
       });
+    case 'venue_users':
+      if (!venueOwnerId) {
+        throw new Error('venueOwnerId is required for venue_users report');
+      }
+      return db.venueUsers.getAllByOwnerId(venueOwnerId);
     default:
       throw new Error(`Table ${tableName} not supported`);
   }
@@ -115,10 +125,28 @@ reportsRouter.post('/', async (req, res) => {
     });
   }
 
-  const firstItem = tableData[0] as Record<string, unknown>;
+  let processedData: object[] = tableData;
+
+  if (table === 'venue_users') {
+    processedData = (tableData as DbVenueUserWithRelations[]).map((item) => ({
+      'Venue Name': item.venue.name,
+      'User Name': item.user.name,
+      'User Email': item.user.email,
+      'Start Date': item.venue.start_event_time
+        ? item.venue.start_event_time.toISOString()
+        : '',
+      'End Date': item.venue.end_event_time
+        ? item.venue.end_event_time.toISOString()
+        : '',
+      Status: item.status,
+      Comments: item.comments,
+    }));
+  }
+
+  const firstItem = processedData[0] as Record<string, unknown>;
   const headers = Object.keys(firstItem);
 
-  const csvData = json2csv(tableData, { keys: headers });
+  const csvData = json2csv(processedData, { keys: headers });
   const csvFileName = `${table}-report-${new Date().getTime()}.csv`;
 
   if (!env.BLOB_READ_WRITE_TOKEN) {

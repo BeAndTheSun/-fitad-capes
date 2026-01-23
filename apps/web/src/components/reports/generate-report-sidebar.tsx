@@ -117,7 +117,10 @@ export const GenerateReportSidebar: FC<Props> = ({ onReportGenerated }) => {
           name: 'table',
           label: t('Select Table'),
           type: 'select',
-          options: [{ value: 'venue', label: t('Venues') }],
+          options: [
+            { value: 'venue', label: t('Venues') },
+            { value: 'venue_users', label: t('Venue Users') },
+          ],
           required: true,
         },
         {
