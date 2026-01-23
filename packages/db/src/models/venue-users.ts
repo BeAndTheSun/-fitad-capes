@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { PgColumn, PgSelect } from 'drizzle-orm/pg-core';
 
 import type { DbVenueUserWithRelations } from '@/db/schema';
@@ -110,6 +110,9 @@ export class DBVenueUserModel extends DbModel<
         venue: {
           columns: {
             id: true,
+            name: true,
+            start_event_time: true,
+            end_event_time: true,
           },
         },
       },
@@ -150,6 +153,9 @@ export class DBVenueUserModel extends DbModel<
         venue: {
           columns: {
             id: true,
+            name: true,
+            start_event_time: true,
+            end_event_time: true,
           },
         },
       },
@@ -225,5 +231,38 @@ export class DBVenueUserModel extends DbModel<
       date: r.name,
       count: Number(r.count),
     }));
+  }
+
+  public async getAllByOwnerId(
+    ownerId: string
+  ): Promise<DbVenueUserWithRelations[]> {
+    return this.client.query.venueUsers.findMany({
+      where: (venueUsers) =>
+        inArray(
+          venueUsers.venueId,
+          this.client
+            .select({ id: venueTable.id })
+            .from(venueTable)
+            .where(eq(venueTable.ownerId, ownerId))
+        ),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        venue: {
+          columns: {
+            id: true,
+            name: true,
+            start_event_time: true,
+            end_event_time: true,
+          },
+        },
+      },
+      orderBy: (venueUsers) => desc(venueUsers.status),
+    });
   }
 }

@@ -316,6 +316,7 @@ const venueUsersModelMock = {
   updateStatus: jest.fn(),
   getVenuesParticipantsCount: jest.fn(),
   getParticipantsStatusCounts: jest.fn(),
+  getAllByOwnerId: jest.fn(),
 };
 
 const DBMock = jest.fn<MockedDb, void[]>().mockImplementation(() => ({
