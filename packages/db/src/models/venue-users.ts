@@ -200,6 +200,25 @@ export class DBVenueUserModel extends DbModel<
     }));
   }
 
+  public async getUserVenueStatusCounts(
+    userId: string
+  ): Promise<{ status: string; count: number }[]> {
+    const result = await this.client
+      .select({
+        status: this.dbTable.status,
+        count: sql<number>`CAST(COUNT(${this.dbTable.userId}) AS INTEGER)`,
+      })
+      .from(this.dbTable)
+      .where(eq(this.dbTable.userId, userId))
+      .groupBy(this.dbTable.status)
+      .execute();
+
+    return result.map((r) => ({
+      status: r.status,
+      count: Number(r.count),
+    }));
+  }
+
   public async getVenuesParticipantsCount({
     ownerId,
     limit,

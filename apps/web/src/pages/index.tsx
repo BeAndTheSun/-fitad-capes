@@ -8,6 +8,7 @@ import { Loading } from '@/components/common/loading';
 import { MetricsDashboard } from '@/components/metrics';
 import { useSessionUser } from '@/components/user/user-context';
 import { VenueOnwerDashboard } from '@/components/venue-owner-admin';
+import { VenueUserMetrics } from '@/components/venue-user-dashboard/venue-user-metrics';
 import { useViewAsMember } from '@/components/view-as-member/view-as-member-context';
 import { useAdminViewAs } from '@/hooks/use-admin-view-as';
 import type { NextPageWithLayout } from '@/types/next';
@@ -73,13 +74,8 @@ const HomePage: NextPageWithLayout = () => {
           <Trans>Welcome,</Trans> {user.name || user.email} (
           {selectedWorkspace?.name})
         </Typography.H1>
-        <div className="mt-10 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-10">
-          <Typography.H2>
-            <Trans>Super Participant Dashboard</Trans>
-          </Typography.H2>
-          <Typography.Paragraph className="text-muted-foreground">
-            <Trans>Work in progress</Trans>
-          </Typography.Paragraph>
+        <div className="mt-10">
+          <VenueUserMetrics />
         </div>
       </div>
     );

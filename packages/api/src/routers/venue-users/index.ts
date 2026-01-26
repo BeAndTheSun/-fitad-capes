@@ -6,6 +6,21 @@ import { venueUsersApiDef } from './def';
 
 export const venueUsersRouter = ctx.router(venueUsersApiDef);
 
+venueUsersRouter.get('/metrics/user', async (req, res) => {
+  if (req.auth == null) {
+    return res.status(401).send({ error: 'Unauthorized' });
+  }
+
+  try {
+    const result = await db.venueUsers.getUserVenueStatusCounts(
+      req.auth.user.id
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to get metrics' });
+  }
+});
+
 venueUsersRouter.post('/:venueId/create', async (req, res) => {
   if (req.auth == null) {
     return res.status(401).send({ error: 'Unauthorized' });
