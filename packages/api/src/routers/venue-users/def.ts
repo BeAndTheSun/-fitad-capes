@@ -5,6 +5,30 @@ import { apiCommonErrorSchema } from '@/api/routers/def-utils';
 
 export const venueUsersApiDef = makeApi([
   {
+    alias: 'getUserMetrics',
+    method: 'get',
+    path: '/metrics/user',
+    description: 'Get venue user metrics',
+    response: z.array(
+      z.object({
+        status: z.string(),
+        count: z.number(),
+      })
+    ),
+    errors: [
+      {
+        status: 401,
+        description: 'Invalid auth',
+        schema: apiCommonErrorSchema,
+      },
+      {
+        status: 500,
+        description: 'Failed to get metrics',
+        schema: apiCommonErrorSchema,
+      },
+    ],
+  },
+  {
     alias: 'createVenueUser',
     method: 'post',
     path: '/:venueId/create',

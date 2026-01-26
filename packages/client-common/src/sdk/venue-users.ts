@@ -53,3 +53,14 @@ export function useUpdateVenueUserStatus(): UseMutationResult<
       ),
   });
 }
+
+export function useGetUserMetrics(params?: {
+  enabled?: boolean;
+}): UseQueryResult<{ status: string; count: number }[] | undefined, Error> {
+  return apiHooks.useGetUserMetrics(
+    {},
+    {
+      enabled: params?.enabled !== undefined ? params.enabled : true,
+    }
+  );
+}
