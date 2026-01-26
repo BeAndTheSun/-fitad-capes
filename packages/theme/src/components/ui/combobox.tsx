@@ -12,6 +12,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from './command';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
@@ -69,23 +70,25 @@ export const Combobox: React.FC<ComboboxProps> = (props) => {
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
           <CommandInput placeholder={inputPlaceholder} className="h-9" />
-          <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup>
-            {options.map((option) => (
-              <CommandItem
-                key={option.value}
-                onSelect={() => handleItemSelect(option.value)}
-              >
-                {option.label}
-                <CheckIcon
-                  className={cn(
-                    'ml-auto h-4 w-4',
-                    value === option.value ? 'opacity-100' : 'opacity-0'
-                  )}
-                />
-              </CommandItem>
-            ))}
-          </CommandGroup>
+          <CommandList>
+            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandGroup>
+              {options.map((option) => (
+                <CommandItem
+                  key={option.value}
+                  onSelect={() => handleItemSelect(option.value)}
+                >
+                  {option.label}
+                  <CheckIcon
+                    className={cn(
+                      'ml-auto h-4 w-4',
+                      value === option.value ? 'opacity-100' : 'opacity-0'
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

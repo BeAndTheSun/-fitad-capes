@@ -11,8 +11,11 @@ export function getFieldDefaultValue<
     case 'text':
     case 'number':
     case 'password':
+    case 'textarea':
+    case 'color':
       return '';
     case 'select':
+    case 'dropdown':
     case 'file':
     case 'date':
       return null;

@@ -9,6 +9,7 @@ export type FieldDataType =
   | 'number'
   | 'select'
   | 'multiselect'
+  | 'dropdown'
   | 'checkbox'
   | 'date'
   | 'file'
@@ -67,4 +68,5 @@ export type FieldData<TFieldValues extends FieldValues = FieldValues> = {
   disablePastDates?: boolean;
   enableCrop?: boolean;
   required?: boolean;
+  searchable?: boolean;
 };

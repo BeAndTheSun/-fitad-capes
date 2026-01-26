@@ -21,6 +21,7 @@ import type { FieldData } from '@/ui/form-hook-helper/types';
 
 import { CheckboxInputHelper } from './fields/checkbox';
 import { DateInputHelper } from './fields/date';
+import { DropdownInputHelper } from './fields/dropdown';
 import { FileInputHelper } from './fields/file';
 import { MultiSelectInputHelper } from './fields/multiselect';
 import { NumberInputHelper } from './fields/number';
@@ -96,6 +97,16 @@ export const FieldResolver = <TFieldValues extends FieldValues>({
   if (type === 'checkbox') {
     return (
       <CheckboxInputHelper
+        key={fieldData.name}
+        form={form}
+        fieldData={fieldData}
+        className={sizeClassName}
+      />
+    );
+  }
+  if (type === 'dropdown') {
+    return (
+      <DropdownInputHelper
         key={fieldData.name}
         form={form}
         fieldData={fieldData}
