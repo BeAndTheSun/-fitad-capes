@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 import {
   Button,
+  Combobox,
   DateRangePicker,
   Form,
   FormControl,
@@ -14,11 +15,6 @@ import {
   FormLabel,
   FormMessage,
   Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Textarea,
 } from '@/theme/index';
 
@@ -330,21 +326,21 @@ export const VenueForm = ({
                       <Trans>Owner Venue</Trans>
                     </FormLabel>
                     <FormControl>
-                      <Select
+                      <Combobox
+                        options={
+                          users?.map((user) => ({
+                            label: user.label,
+                            value: user.id,
+                          })) || []
+                        }
                         value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('Select a owner')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users?.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onSelect={field.onChange}
+                        placeholder={t('Select a owner')}
+                        inputPlaceholder={t('Search...')}
+                        emptyMessage={t('No options found.')}
+                        className="w-full"
+                        disabled={field.disabled}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

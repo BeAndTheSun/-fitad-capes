@@ -237,9 +237,10 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
             children: [
               {
                 name: 'email',
-                type: 'select',
+                type: 'dropdown',
                 label: t('Email'),
                 size: 'full',
+                searchable: true,
                 required: true,
                 options:
                   userList?.items?.map((user) => ({
@@ -251,6 +252,7 @@ const WizardWorkspaceProfilePage: NextPageWithLayout = () => {
                 name: 'role',
                 type: 'select',
                 label: t('Role'),
+                placeholder: t('Select a role'),
                 size: 'full',
                 options: userRoleList.map((role) => ({
                   label: getUserRoleName(t, role as UserRoleEnum),
