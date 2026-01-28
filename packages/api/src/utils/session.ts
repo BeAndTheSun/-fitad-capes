@@ -42,7 +42,7 @@ export async function createNewUser(
     },
     options: {
       to: user.email,
-      subject: 'Welcome to the Turborepo template!',
+      subject: 'Welcome to Fit ADS!',
     },
   });
 
