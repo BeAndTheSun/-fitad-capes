@@ -88,8 +88,8 @@ const HomePage: NextPageWithLayout = () => {
       </Head>
       <div>
         <Typography.H1>
-          <Trans>Welcome,</Trans> {user.name || user.email} (
-          {selectedWorkspace?.name})
+          <Trans>Welcome,</Trans> {user.name || user.email}
+          {selectedWorkspace?.name && ` (${selectedWorkspace.name})`}
         </Typography.H1>
         <Typography.H2>
           <Trans>Metrics</Trans>

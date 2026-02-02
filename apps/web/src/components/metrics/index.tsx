@@ -83,7 +83,7 @@ const ExpandableCard: React.FC<ExpandableCardProps> = ({
 
 export const MetricsDashboard: React.FC = () => {
   const { t } = useTranslation();
-  const { selectedWorkspace } = useSessionUser();
+  const { selectedWorkspace, isSuperAdmin } = useSessionUser();
 
   const {
     data: usersOverTimeData,
@@ -147,6 +147,25 @@ export const MetricsDashboard: React.FC = () => {
     metric: 'VENUES_OVER_TIME',
     workspaceId: selectedWorkspace?.id ?? '',
   });
+
+  if (isSuperAdmin && !selectedWorkspace?.id) {
+    return (
+      <div className="rounded-xl bg-white p-8 text-center shadow-lg dark:bg-gray-800">
+        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
+          <HomeIcon className="size-8 text-blue-600 dark:text-blue-400" />
+        </div>
+        <Typography.H3 className="mb-2">
+          <Trans>Select a workspace to view its metrics</Trans>
+        </Typography.H3>
+        <Typography.Paragraph className="text-sm text-gray-500 dark:text-gray-400">
+          <Trans>
+            Please select a workspace from the dropdown menu to view its metrics
+            and analytics.
+          </Trans>
+        </Typography.Paragraph>
+      </div>
+    );
+  }
 
   const isLoading =
     isUsersOverTimeLoading ||

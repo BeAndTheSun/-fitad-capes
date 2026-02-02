@@ -124,6 +124,8 @@
   "Update Role for": "Update Role for",
   "View List": "View List",
   "No items available.": "No items available.",
+  "Select a workspace to view its metrics": "Select a workspace to view its metrics",
+  "Please select a workspace from the dropdown menu to view its metrics and analytics.": "Please select a workspace from the dropdown menu to view its metrics and analytics.",
   "Loading": "Loading",
   "Error loading data": "Error loading data",
   "Trainer Dashboard": "Trainer Dashboard",
