@@ -125,6 +125,8 @@
   "Update Role for": "Actualizar rol para",
   "View List": "Ver lista",
   "No items available.": "No hay elementos disponibles.",
+  "Select a workspace to view its metrics": "Selecciona un espacio de trabajo para ver sus métricas",
+  "Please select a workspace from the dropdown menu to view its metrics and analytics.": "Por favor, selecciona un espacio de trabajo del menú desplegable para ver sus métricas y análisis.",
   "Loading": "Cargando",
   "Error loading data": "Error al cargar datos",
   "Trainer Dashboard": "Panel del entrenador",
