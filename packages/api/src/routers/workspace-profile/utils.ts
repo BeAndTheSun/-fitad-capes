@@ -9,54 +9,17 @@ export async function processMembers({
   workspaceId,
   members,
   senderName,
-  senderId,
 }: {
   workspaceId: string;
   members: { email: string; role: UserRoleEnum }[];
   senderName: string;
   senderId: string;
 }): Promise<void> {
-  const emails = members.map((m) => m.email);
-  const existingUsers = await db.user.findManyByEmail(emails);
-  const existingEmailSet = new Set(existingUsers.map((u) => u.email));
-
-  const membersToInvite = members.filter((m) => !existingEmailSet.has(m.email));
-  const existingMembersToAdd = members.filter((m) =>
-    existingEmailSet.has(m.email)
-  );
-
-  await Promise.all(
-    existingMembersToAdd.map(async (member) => {
-      const userToAdd = existingUsers.find((u) => u.email === member.email);
-      if (!userToAdd) return;
-
-      const alreadyInWorkspace =
-        await db.userWorkspaces.findByUserIdAndWorkspaceId(
-          userToAdd.id,
-          workspaceId
-        );
-
-      if (!alreadyInWorkspace) {
-        await db.userWorkspaces.create({
-          data: {
-            userId: userToAdd.id,
-            workspaceId,
-            role: member.role,
-          },
-          activityStreamData: {
-            userId: senderId,
-            workspaceId,
-          },
-        });
-      }
-    })
-  );
-
-  if (membersToInvite.length > 0) {
+  if (members.length > 0) {
     await inviteMultipleMembersToWorkspace({
       workspaceId,
       senderName,
-      members: membersToInvite,
+      members,
     });
   }
 }

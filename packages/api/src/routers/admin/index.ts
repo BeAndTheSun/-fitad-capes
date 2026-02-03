@@ -1,4 +1,5 @@
 import type { DbModelMap } from '@meltstudio/db/src/models/db';
+import { sendEmailTemplate } from '@meltstudio/mailing';
 import { hashPassword } from '@meltstudio/server-common';
 import type { RowEmbeddingData } from '@meltstudio/types';
 import { insertModelSchemas } from '@meltstudio/zod-schemas';
@@ -429,6 +430,23 @@ adminRouter.post('/:model', async (req, res) => {
             'workspaceId' in record ? record.workspaceId : null
           );
         }
+      }
+
+      if (
+        modelName === 'users' &&
+        'email' in record &&
+        typeof record.email === 'string'
+      ) {
+        await sendEmailTemplate({
+          template: {
+            id: 'welcome',
+            props: {},
+          },
+          options: {
+            to: record.email,
+            subject: 'Welcome to Fit ADS!',
+          },
+        });
       }
 
       return res.status(201).json(record);
